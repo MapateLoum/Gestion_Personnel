@@ -167,9 +167,9 @@ export default function ModificationConge() {
 
         <div className={styles.buttons}>
           <button type="submit">Envoyer</button>
-          <button type="button" onClick={handlePrint} className={styles.printBtn}>
+          {/* <button type="button" onClick={handlePrint} className={styles.printBtn}>
             Imprimer
-          </button>
+          </button> */}
         </div>
       </form>
     </main>

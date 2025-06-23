@@ -114,3 +114,30 @@
     margin-bottom: 25px;
   }
 }
+.buttonRetour {
+  background-color: #555; /* gris neutre */
+  color: white;
+  padding: 10px 20px;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.3s ease;
+}
+
+.buttonRetour:hover {
+  background-color: #333;
+}
+.successMsg {
+  color: green;
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+.errorMsg {
+  color: red;
+  font-weight: bold;
+  margin-top: 15px;
+}

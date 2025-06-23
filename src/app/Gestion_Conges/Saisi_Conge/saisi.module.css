@@ -106,4 +106,16 @@
   background-color: #5a0000;
 }
 
-/* Impression propre */
+.acceptMsg {
+  color: green;
+  font-weight: bold;
+  margin-top: 15px;
+  text-align: center;
+}
+
+.rejectMsg {
+  color: red;
+  font-weight: bold;
+  margin-top: 15px;
+  text-align: center;
+}
