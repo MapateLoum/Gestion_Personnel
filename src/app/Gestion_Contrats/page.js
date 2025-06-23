@@ -15,7 +15,7 @@ export default function GestionContrats() {
 
       <section className={styles.menu}>
         <Link href="./Gestion_Contrats" className={styles.link}>** 📁 Gestion des Contrats **</Link>
-        <Link href="#Saisi" className={styles.link}>📝 Saisie du Personnel</Link>
+        <Link href="./Gestion_Contrats/Saisi_Personnelle" className={styles.link}>📝 Saisie du Personnel</Link>
         <Link href="#Salaires" className={styles.link}>💵 Salaires du Personnel</Link>
         <Link href="#Echeancier" className={styles.link}>📅 Échéancier des Contrats</Link>
         <Link href="#Renouvellement" className={styles.link}>🔄 Renouvellement CDD2/CDI</Link>

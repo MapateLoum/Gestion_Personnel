@@ -14,13 +14,15 @@ export default function GestionConges() {
       </header>
 
       <section className={styles.menu}>
-        <Link href="./Gestion_Conges" className={styles.link}>** 🌴 Gestion des Congés **</Link>
-        <Link href="/Gestion_Conges/Saisi_Conge" className={styles.link}>📝 Saisie des congés</Link>
-        <Link href="#Modification" className={styles.link}>✏️ Modification des congés</Link>
-        <Link href="#Edition" className={styles.link}>📤 Édition des congés</Link>
-        <Link href="#Periode" className={styles.link}>📅 Liste des périodes</Link>
-        <Link href="/" className={styles.link}>⬅️ Retour au menu principal</Link>
-      </section>
+  <Link href="./Gestion_Conges" className={styles.link}>🌴 Gestion des Congés</Link>
+  <Link href="/Gestion_Conges/Saisi_Conge" className={styles.link}>📝 Saisie des congés</Link>
+  <Link href="/Gestion_Conges/Modif_Conge" className={styles.link}>✏️ Modification des congés</Link>
+  <Link href="/Gestion_Conges/Edition_Conge" className={styles.link}>📤 Édition des congés</Link>
+  <Link href="/Gestion_Conges/Periode" className={styles.link}>📅 Liste des périodes</Link>
+  <Link href="/Gestion_Conges/Consultation" className={styles.link}>👁️ Consultation des congés par agent</Link>
+  <Link href="/" className={styles.link}>⬅️ Retour au menu principal</Link>
+</section>
+
 
       <footer className={styles.footer}>
         <h2>GESTION DU PERSONNEL</h2>
