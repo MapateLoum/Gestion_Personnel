@@ -14,7 +14,7 @@ export default function Accueil() {
       </header>
 
       <section className={styles.menu}>
-        <Link href="./Gestion_Journaliers" className={styles.link}>🛠️ Gestion des Journaliers</Link>
+        <Link href="./Gestion_Journaliers" className={styles.link}>** 🛠️ Gestion des Journaliers **</Link>
         <Link href="./Gestion_Journaliers/Saisi_LP" className={styles.link}>📝 Menu des saisies et modifications</Link>
         <Link href="./Gestion_Journaliers/Consultations_LP" className={styles.link}>🔍 Menu des consultations</Link>
         <Link href="./Gestion_Journaliers/Editions_LP" className={styles.link}>📤 Menu des éditions</Link>

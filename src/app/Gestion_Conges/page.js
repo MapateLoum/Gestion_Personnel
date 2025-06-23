@@ -14,7 +14,7 @@ export default function GestionConges() {
       </header>
 
       <section className={styles.menu}>
-        <Link href="./Gestion_Conges" className={styles.link}>🌴 Gestion des Congés</Link>
+        <Link href="./Gestion_Conges" className={styles.link}>** 🌴 Gestion des Congés **</Link>
         <Link href="/Gestion_Conges/Saisi_Conge" className={styles.link}>📝 Saisie des congés</Link>
         <Link href="#Modification" className={styles.link}>✏️ Modification des congés</Link>
         <Link href="#Edition" className={styles.link}>📤 Édition des congés</Link>

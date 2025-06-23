@@ -14,7 +14,7 @@ export default function Editions_LP() {
       </header>
 
       <section className={styles.menu}>
-        <Link href="./Editions_LP" className={styles.link}>📄 Edition LP</Link>
+        <Link href="./Editions_LP" className={styles.link}>** 📄 Edition LP **</Link>
         <Link href="#liste_bc" className={styles.link}>🧾 Liste Récap des B.C.</Link>
         <Link href="#liste_bc_section" className={styles.link}>📂 Liste B.C / Section</Link>
         <Link href="#liste_bc_non_pointe" className={styles.link}>⛔ B.C. non pointés</Link>

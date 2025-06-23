@@ -14,7 +14,7 @@ export default function Saisi_LP() {
       </header>
 
       <section className={styles.menu}>
-        <Link href="./Saisi_LP" className={styles.link}>📝 Saisi des LP</Link>
+        <Link href="./Saisi_LP" className={styles.link}>** 📝 Saisi des LP **</Link>
         <Link href="#Saisie_bon_cmde" className={styles.link}>📄 Saisie des bons de commande</Link>
         <Link href="#saisie_pointages" className={styles.link}>⏱️ Saisie des pointages</Link>
         <Link href="#modif_bons" className={styles.link}>✏️ Modifier les bons</Link>

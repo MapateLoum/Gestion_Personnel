@@ -14,7 +14,7 @@ export default function GestionContrats() {
       </header>
 
       <section className={styles.menu}>
-        <Link href="./Gestion_Contrats" className={styles.link}>📁 Gestion des Contrats</Link>
+        <Link href="./Gestion_Contrats" className={styles.link}>** 📁 Gestion des Contrats **</Link>
         <Link href="#Saisi" className={styles.link}>📝 Saisie du Personnel</Link>
         <Link href="#Salaires" className={styles.link}>💵 Salaires du Personnel</Link>
         <Link href="#Echeancier" className={styles.link}>📅 Échéancier des Contrats</Link>

@@ -14,7 +14,7 @@ export default function Consultation_LP() {
       </header>
 
       <section className={styles.menu}>
-        <Link href="./Consultation_LP" className={styles.link}>📖 Consultation LP</Link>
+        <Link href="./Consultation_LP" className={styles.link}>** 📖 Consultation LP **</Link>
         <Link href="#consultations_bons" className={styles.link}>📄 Bons de commande</Link>
         <Link href="#facturation_mensuelle" className={styles.link}>💰 Facturation mensuelle</Link>
         <Link href="#facturation_section" className={styles.link}>📊 Facturation / Section</Link>
