@@ -1,0 +1,143 @@
+.container {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  max-width: 650px;
+  margin: 30px auto;
+  padding: 30px 25px;
+  background: #f9f9f9;
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.title {
+  color: #076969;
+  font-size: 30px;
+  margin-bottom: 25px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  text-align: left;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+}
+
+.formGroup label {
+  font-weight: 600;
+  color: #076969;
+  margin-bottom: 5px;
+}
+
+.input {
+  padding: 10px 15px;
+  font-size: 16px;
+  border: 1.5px solid #ccc;
+  border-radius: 8px;
+  transition: border-color 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.input:focus {
+  border-color: #076969;
+  outline: none;
+}
+
+.buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.submitBtn {
+  background-color: #076969;
+  color: white;
+  font-weight: 700;
+  font-size: 18px;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(7, 105, 105, 0.6);
+  transition: background-color 0.3s ease;
+}
+
+.submitBtn:hover {
+  background-color: #054f4f;
+}
+
+.printBtn {
+  background-color: #8b0000;
+  color: white;
+  font-weight: 700;
+  font-size: 18px;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(139, 0, 0, 0.6);
+  transition: background-color 0.3s ease;
+}
+
+.printBtn:hover {
+  background-color: #5a0000;
+}
+
+/* ====== PARTIE IMPRESSION ====== */
+@media print {
+  .buttons {
+    display: none !important;
+  }
+
+  .input {
+    display: none !important;
+  }
+
+  .formGroup label {
+    display: inline-block;
+    width: 250px;
+    border-bottom: 1px dotted black;
+    margin-bottom: 15px;
+    padding-left: 5px;
+    color: black;
+    font-weight: normal;
+  }
+
+  .formGroup {
+    margin-bottom: 25px;
+  }
+}
+.buttonRetour {
+  background-color: #555; /* gris neutre */
+  color: white;
+  padding: 10px 20px;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.3s ease;
+}
+
+.buttonRetour:hover {
+  background-color: #333;
+}
+.successMsg {
+  color: green;
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+.errorMsg {
+  color: red;
+  font-weight: bold;
+  margin-top: 15px;
+}

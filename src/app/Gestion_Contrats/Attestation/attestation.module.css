@@ -1,0 +1,96 @@
+.container {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 25px;
+  background: #f9f9f9;
+  border-radius: 10px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.title {
+  text-align: center;
+  color: #076969;
+  font-size: 26px;
+  margin-bottom: 25px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.label {
+  font-weight: 600;
+  color: #076969;
+}
+
+.input, .select {
+  padding: 10px 15px;
+  font-size: 16px;
+  border: 1.5px solid #ccc;
+  border-radius: 8px;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.3s ease;
+}
+
+.input:focus, .select:focus {
+  border-color: #076969;
+  outline: none;
+}
+
+.button {
+  margin-top: 15px;
+  padding: 12px 25px;
+  background-color: #076969;
+  color: white;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(7,105,105,0.6);
+  transition: background-color 0.3s ease;
+}
+
+.button:hover {
+  background-color: #054f4f;
+}
+
+.buttonAnnuler {
+  background-color: #999;
+  margin-left: 10px;
+}
+
+.buttonAnnuler:hover {
+  background-color: #777;
+}
+
+.error {
+  margin-top: 10px;
+  color: red;
+}
+
+.attestationSection {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.attestationContent {
+  margin-top: 20px;
+  padding: 20px;
+  border: 1.5px solid #076969;
+  border-radius: 10px;
+  background-color: #e6f7f7;
+  color: #333;
+  font-size: 16px;
+  line-height: 1.5;
+}
+.buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
