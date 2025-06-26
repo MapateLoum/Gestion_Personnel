@@ -1,13 +1,18 @@
 .container {
-  max-width: 1000px;
-  margin: auto;
-  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 40px 20px;
+  max-width: 600px;
+  margin: 0 auto;
+  background: #f9f9f9;
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
 }
 
 .title {
-  font-size: 24px;
-  margin-bottom: 20px;
   text-align: center;
+  color: #076969;
+  margin-bottom: 30px;
+  font-size: 24px;
 }
 
 .form {

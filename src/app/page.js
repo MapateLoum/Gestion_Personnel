@@ -18,7 +18,6 @@ export default function Accueil() {
         <Link href="/" className={styles.link}>🏠 ** MENU GENERAL **</Link>
         <Link href="./Gestion_Conges" className={styles.link}>🌴 GESTION DES CONGES</Link>
         <Link href="./Gestion_Contrats" className={styles.link}>📁 GESTION DES CONTRATS</Link>
-        <Link href="./Gestion_Journaliers" className={styles.link}>🛠️ GESTION DES JOURNALIERS</Link>
         <Link href="#logout" className={styles.link}>❌ QUITTER L’APPLICATION</Link>
       </section>
 
