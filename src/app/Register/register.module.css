@@ -1,0 +1,154 @@
+/* Conteneur général */
+.container {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 40px 20px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(to bottom, #f0f4f8, #ffffff);
+  color: #333;
+  text-align: center;
+}
+
+/* Header */
+.registerHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(45deg, #074747, #0a8f8f);
+  padding: 22px 30px;
+  border-radius: 12px;
+  margin-bottom: 40px;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+  flex-wrap: wrap;
+  color: white;
+  width: 600px;
+}
+
+.companyPhoto {
+  width: 120px;
+  height: auto;
+  border-radius: 12px;
+  object-fit: cover;
+  margin-right: 20px;
+}
+
+.registerTitleWrapper {
+  text-align: left;
+}
+
+.registerTitle {
+  font-size: 28px;
+  margin: 0 0 6px 0;
+  font-weight: 800;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+}
+
+.registerSubtitle {
+  font-size: 17px;
+  margin: 0;
+  font-weight: 600;
+  opacity: 0.95;
+}
+
+/* Section Formulaire */
+.formSection {
+  width: 100%;
+  max-width: 600px;
+  background-color: #fff;
+  padding: 30px 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  margin-top: 15px;
+  color: #074747;
+  text-align: left;
+}
+
+.input {
+  padding: 10px 12px;
+  font-size: 16px;
+  border: 1.8px solid #ccc;
+  border-radius: 8px;
+  transition: border-color 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #074747;
+}
+
+.button {
+  margin-top: 25px;
+  padding: 12px;
+  background-color: #138686;
+  color: white;
+  font-weight: 700;
+  font-size: 18px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.button:hover {
+  background-color: #0a8f8fcc;
+}
+
+/* Messages */
+.error {
+  color: #cc2a2a;
+  font-weight: 700;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+.success {
+  color: #2a8a2a;
+  font-weight: 700;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+/* Texte sous formulaire */
+.switchText {
+  margin-top: 20px;
+  font-size: 15px;
+  text-align: center;
+  color: #555;
+}
+
+.switchLink {
+  color: #074747;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.switchLink:hover {
+  text-decoration: underline;
+}
+
+/* Footer */
+.registerFooter {
+  margin-top: 50px;
+  padding: 20px;
+  text-align: center;
+    background: linear-gradient(45deg, #074747, #0a8f8f);
+  color: #f0f0f0;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  width: 600px;
+}

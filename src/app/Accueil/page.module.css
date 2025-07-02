@@ -13,7 +13,7 @@
   justify-content: center;
   margin-bottom: 40px;
   flex-wrap: wrap;
-  background-color: #076969;
+  background: linear-gradient(45deg, #074747, #0a8f8f);
   padding: 20px;
   border-radius: 12px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
@@ -68,9 +68,11 @@
 }
 
 .footer {
-  background-color: #8B0000;
+background: linear-gradient(45deg, #7b1f2b, #a32638);
   color: white;
   padding: 20px;
+  width: 600px;
+  height: 80px;
   font-size: 20px;
   border-radius: 8px;
   box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
