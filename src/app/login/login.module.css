@@ -1,0 +1,149 @@
+/* Container général */
+.container {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 40px 20px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(to bottom, #f0f4f8, #ffffff);
+  color: #333;
+}
+
+/* Header de connexion */
+.loginHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(45deg, #074747, #0a8f8f);
+  padding: 20px 30px;
+  border-radius: 12px;
+  margin-bottom: 40px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  flex-wrap: wrap;
+  color: white;
+  width: 600px;
+    
+}
+
+.companyPhoto {
+  width: 120px;
+  height: auto;
+  border-radius: 12px;
+  object-fit: cover;
+  margin-right: 20px;
+}
+
+.loginTitleWrapper {
+  text-align: left;
+}
+
+.loginTitle {
+  font-size: 26px;
+  margin: 0 0 6px 0;
+  font-weight: 700;
+}
+
+.loginSubtitle {
+  font-size: 16px;
+  margin: 0;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+/* Section formulaire */
+.formSection {
+  width: 100%;
+  max-width: 600px;
+  background-color: #fff;
+  padding: 30px 25px;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+/* Formulaire */
+.form {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Labels */
+.label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  margin-top: 15px;
+  color: #064747;
+}
+
+/* Inputs */
+.input {
+  padding: 10px 12px;
+  font-size: 16px;
+  border: 1.8px solid #ccc;
+  border-radius: 8px;
+  transition: border-color 0.3s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #064747;
+}
+
+/* Bouton */
+.button {
+  margin-top: 25px;
+  padding: 12px;
+  background-color: #064747;
+  color: white;
+  font-weight: 700;
+  font-size: 18px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.button:hover {
+  background-color: #0a8f8f;
+}
+
+/* Texte d'erreur */
+.error {
+  color: #cc2a2a;
+  font-weight: 700;
+  margin-bottom: 12px;
+  text-align: center;
+}
+
+/* Texte pour changer de page */
+.switchText {
+  margin-top: 20px;
+  font-size: 15px;
+  text-align: center;
+  color: #555;
+}
+
+/* Lien inscription */
+.switchLink {
+  color: #064747;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.switchLink:hover {
+  text-decoration: underline;
+}
+
+/* Footer */
+.loginFooter {
+  margin-top: 50px;
+  padding: 20px;
+  text-align: center;
+  background: linear-gradient(45deg, #074747, #0a8f8f);
+  color: #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  font-style: italic;
+  width: 100%;
+  max-width: 600px;
+}

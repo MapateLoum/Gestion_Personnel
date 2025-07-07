@@ -1,0 +1,148 @@
+.container {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 40px 20px;
+  max-width: 700px;
+  margin: 0 auto;
+  background: #f9f9f9;
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.title {
+  color: #076969;
+  font-size: 28px;
+  margin-bottom: 30px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  text-align: left;
+}
+
+.formGroup label {
+  font-weight: 600;
+  color: #076969;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.input {
+  padding: 10px 15px;
+  font-size: 16px;
+  border: 1.5px solid #ccc;
+  border-radius: 8px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.buttonEnvoyer {
+  background-color: #076969;
+  color: white;
+  font-weight: 700;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  box-shadow: 0 4px 10px rgba(7,105,105,0.6);
+  transition: background-color 0.3s ease;
+}
+
+.buttonEnvoyer:hover {
+  background-color: #054f4f;
+}
+
+.buttonAnnuler {
+  background-color: #999;
+  color: white;
+  padding: 10px 20px;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.buttonAnnuler:hover {
+  background-color: #777;
+}
+
+.buttonRetour {
+  background-color: #8b0000;
+  color: white;
+  padding: 10px 20px;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  box-shadow: 0 4px 10px rgba(139,0,0,0.6);
+  transition: background-color 0.3s ease;
+}
+
+.buttonRetour:hover {
+  background-color: #5a0000;
+}
+
+.agentInfo {
+  background-color: #e6f7f7;
+  border: 1.5px solid #076969;
+  border-radius: 10px;
+  padding: 20px;
+  margin-top: 30px;
+  color: #333;
+  font-size: 16px;
+  text-align: left;
+}
+
+.agentInfo h3 {
+  margin-top: 0;
+  color: #076969;
+  font-size: 22px;
+  margin-bottom: 15px;
+}
+
+.agentInfo p {
+  margin: 6px 0;
+}
+
+.tableContainer {
+  overflow-x: auto;
+  margin-top: 20px;
+}
+
+.resultTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.resultTable th,
+.resultTable td {
+  border: 1px solid #ccc;
+  padding: 8px 10px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.resultTable th {
+  background-color: #076969;
+  color: white;
+}
+.errorMessage {
+  margin-top: 12px;
+  color: #b00020;
+  font-weight: 700;
+  text-align: center;
+}
