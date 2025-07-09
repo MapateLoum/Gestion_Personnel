@@ -36,7 +36,7 @@ export default function EditCongeForm() {
 
   return (
     <div className={styles.container}>
-      <h2 className={styles.title}>Édition de Congé</h2>
+      <h2 className={styles.title}>Liste des Périodes</h2>
       <form onSubmit={handleSubmit} className={styles.form}>
         <div className={styles.formGroup}>
           <label htmlFor="referenceDebut">Référence début</label>

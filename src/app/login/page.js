@@ -11,20 +11,32 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const dummyUser = { matricule: '12345', password: '123456' };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
     if (!matricule || !password) {
       setError('Veuillez remplir tous les champs.');
       return;
     }
-    if (matricule === dummyUser.matricule && password === dummyUser.password) {
-      document.cookie = "isLoggedIn=true; path=/; max-age=3600"; // <-- pose cookie
-      router.push('/Accueil');
-    } else {
-      setError('Matricule ou mot de passe incorrect.');
+
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ matricule, password }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        document.cookie = "isLoggedIn=true; path=/; max-age=3600";
+        router.push('/Accueil');
+      } else {
+        setError(data.message);
+      }
+    } catch (err) {
+      setError('Erreur serveur, veuillez réessayer plus tard.');
     }
   };
 

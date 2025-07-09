@@ -1,39 +1,8 @@
-'use client';
+"use client";
 
 import { useState } from 'react';
 import styles from './echeancier.module.css';
 import { useRouter } from 'next/navigation';
-
-const contratsFictifs = [
-  {
-    ref: 'CTR001',
-    nom: 'Diop',
-    prenom: 'Aminata',
-    type: 'CDD',
-    dateFin: '2025-07-01',
-  },
-  {
-    ref: 'CTR002',
-    nom: 'Ba',
-    prenom: 'Mamadou',
-    type: 'CDI',
-    dateFin: '2026-03-15',
-  },
-  {
-    ref: 'CTR003',
-    nom: 'Sow',
-    prenom: 'Fatou',
-    type: 'Stage',
-    dateFin: '2025-06-25',
-  },
-  {
-    ref: 'CTR004',
-    nom: 'Ndoye',
-    prenom: 'Ibrahima',
-    type: 'CDD',
-    dateFin: '2025-08-05',
-  },
-];
 
 export default function EcheancierContrats() {
   const router = useRouter();
@@ -42,7 +11,7 @@ export default function EcheancierContrats() {
   const [erreur, setErreur] = useState('');
   const [resultats, setResultats] = useState([]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!dateDebut || !dateFin) {
@@ -56,12 +25,20 @@ export default function EcheancierContrats() {
     }
 
     setErreur('');
-    const filtres = contratsFictifs.filter((contrat) => {
-      const dateContrat = new Date(contrat.dateFin);
-      return dateContrat >= new Date(dateDebut) && dateContrat <= new Date(dateFin);
-    });
 
-    setResultats(filtres);
+    try {
+      const res = await fetch(`/api/echeancier?dateDebut=${dateDebut}&dateFin=${dateFin}`);
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        setErreur(data.message || 'Erreur lors de la récupération.');
+        return;
+      }
+
+      setResultats(data.contrats || []);
+    } catch (err) {
+      setErreur('Erreur réseau ou serveur.');
+    }
   };
 
   return (
@@ -115,16 +92,16 @@ export default function EcheancierContrats() {
           </thead>
           <tbody>
             {resultats.map((contrat, index) => {
-              const dateFin = new Date(contrat.dateFin);
+              const dateFin = new Date(contrat.date_fin);
               const diffJours = Math.ceil((dateFin - new Date()) / (1000 * 60 * 60 * 24));
               const isAlert = diffJours <= 15;
               return (
                 <tr key={index} className={isAlert ? styles.alertRow : ''}>
-                  <td>{contrat.ref}</td>
+                  <td>{contrat.id}</td>
                   <td>{contrat.nom}</td>
                   <td>{contrat.prenom}</td>
-                  <td>{contrat.type}</td>
-                  <td>{contrat.dateFin}</td>
+                  <td>{contrat.type_contrat}</td>
+                  <td>{contrat.date_fin.slice(0, 10)}</td>
                 </tr>
               );
             })}
@@ -132,7 +109,7 @@ export default function EcheancierContrats() {
         </table>
       )}
 
-      {resultats.length === 0 && dateDebut && dateFin && (
+      {resultats.length === 0 && dateDebut && dateFin && !erreur && (
         <p className={styles.noResult}>Aucun contrat trouvé dans cet intervalle.</p>
       )}
     </div>

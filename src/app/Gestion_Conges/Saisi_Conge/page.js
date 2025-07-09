@@ -27,17 +27,18 @@ export default function SaisieConges() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setMessage("");
 
-    // Vérification que tous les champs sont remplis
+    // Vérifier que tout est rempli
     const allFilled = Object.values(formData).every((val) => val.trim() !== "");
     if (!allFilled) {
       setMessage("Tous les champs doivent être remplis avant d'envoyer.");
       return;
     }
 
-    // Vérifier que dateDepart < dateRetour
+    // Vérifier dates
     const dateDepart = new Date(formData.dateDepart);
     const dateRetour = new Date(formData.dateRetour);
     if (dateDepart >= dateRetour) {
@@ -45,7 +46,23 @@ export default function SaisieConges() {
       return;
     }
 
-    setMessage("Données envoyées avec succès !");
+    try {
+      const res = await fetch("/api/conges", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        setMessage("Congé enregistré avec succès !");
+      } else {
+        setMessage("Erreur serveur, veuillez réessayer.");
+      }
+    } catch (err) {
+      console.error(err);
+      setMessage("Erreur réseau, veuillez réessayer.");
+    }
   };
 
   const imprimer = () => {
@@ -63,55 +80,27 @@ export default function SaisieConges() {
 
     const content = `
       <h2>Attestation Administrative de Congés</h2>
-      <p>Par la présente, il est certifié que l'agent portant le matricule <strong>${matricule || "[non renseigné]"}</strong>, ayant une ancienneté de <strong>${anciennete || "[non renseigné]"}</strong> années,</p>
-      <p>a bénéficié d'un congé dont la période s'étend du <strong>${dateDepart || "[non renseigné]"}</strong> au <strong>${dateRetour || "[non renseigné]"}</strong>.</p>
-      <p>Durant cette période, les éléments suivants sont à noter :</p>
+      <p>Matricule: <strong>${matricule}</strong></p>
+      <p>Ancienneté: <strong>${anciennete}</strong> ans</p>
+      <p>Du <strong>${dateDepart}</strong> au <strong>${dateRetour}</strong></p>
       <ul>
-        <li><strong>Médaille :</strong> ${medaille || "Aucune"}</li>
-        <li><strong>Reliquat :</strong> ${reliquat || "Aucun"}</li>
-        <li><strong>Intercalaire :</strong> ${intercalaire || "Non applicable"}</li>
-        <li><strong>Supplément femme :</strong> ${supplFemme || "Non applicable"}</li>
+        <li>Médaille: ${medaille}</li>
+        <li>Reliquat: ${reliquat}</li>
+        <li>Intercalaire: ${intercalaire}</li>
+        <li>Supplément femme: ${supplFemme}</li>
       </ul>
-      <p><strong>Observations :</strong> ${observations || "Aucune observation particulière."}</p>
-      <p>Cette attestation est délivrée pour servir et valoir ce que de droit.</p>
-      <p>Fait à [Lieu], le ${new Date().toLocaleDateString()}.</p>
-      <p>Signature de l'autorité compétente</p>
+      <p>Observations: ${observations}</p>
+      <p>Fait le ${new Date().toLocaleDateString()}</p>
     `;
 
     const printWindow = window.open("", "", "width=800,height=600");
     printWindow.document.write(`
       <html>
         <head>
-          <title>Attestation de congés</title>
+          <title>Impression Congés</title>
           <style>
-            body {
-              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-              padding: 30px;
-              color: #333;
-              line-height: 1.5;
-            }
-            h2 {
-              color: #076969;
-              text-align: center;
-              margin-bottom: 20px;
-              text-transform: uppercase;
-              letter-spacing: 1.2px;
-            }
-            p {
-              font-size: 16px;
-              margin: 12px 0;
-            }
-            ul {
-              margin-left: 20px;
-              margin-bottom: 20px;
-            }
-            li {
-              font-size: 16px;
-              margin: 6px 0;
-            }
-            strong {
-              color: #076969;
-            }
+            body { font-family: Arial, sans-serif; padding: 20px; }
+            h2 { text-align: center; }
           </style>
         </head>
         <body>
@@ -135,20 +124,18 @@ export default function SaisieConges() {
       </header>
 
       <form className={styles.form} onSubmit={handleSubmit}>
-        <label htmlFor="matricule">Matricule :</label>
+        <label>Matricule :</label>
         <input
           type="text"
-          id="matricule"
           name="matricule"
           value={formData.matricule}
           onChange={handleChange}
           required
         />
 
-        <label htmlFor="anciennete">Ancienneté (années) :</label>
+        <label>Ancienneté (années) :</label>
         <input
           type="number"
-          id="anciennete"
           name="anciennete"
           min="0"
           value={formData.anciennete}
@@ -156,73 +143,78 @@ export default function SaisieConges() {
           required
         />
 
-        <label htmlFor="dateDepart">Date départ :</label>
+        <label>Date départ :</label>
         <input
           type="date"
-          id="dateDepart"
           name="dateDepart"
           value={formData.dateDepart}
           onChange={handleChange}
           required
         />
 
-        <label htmlFor="dateRetour">Date retour :</label>
+        <label>Date retour :</label>
         <input
           type="date"
-          id="dateRetour"
           name="dateRetour"
           value={formData.dateRetour}
           onChange={handleChange}
           required
         />
 
-        <label htmlFor="medaille">Médaille :</label>
+        <label>Médaille :</label>
         <input
-          type="text"
-          id="medaille"
+          type="number"
           name="medaille"
+          min="0"
           value={formData.medaille}
           onChange={handleChange}
+          required
         />
 
-        <label htmlFor="reliquat">Reliquat :</label>
+        <label>Reliquat :</label>
         <input
           type="text"
-          id="reliquat"
           name="reliquat"
           value={formData.reliquat}
           onChange={handleChange}
+          required
         />
 
-        <label htmlFor="intercalaire">Intercalaire :</label>
-        <input
-          type="text"
-          id="intercalaire"
+        <label>Intercalaire :</label>
+        <select
           name="intercalaire"
           value={formData.intercalaire}
           onChange={handleChange}
-        />
+          required
+        >
+          <option value="">-- Choisir --</option>
+          <option value="O">Oui</option>
+          <option value="N">Non</option>
+        </select>
 
-        <label htmlFor="observations">Observations :</label>
-        <textarea
-          id="observations"
-          name="observations"
-          value={formData.observations}
-          onChange={handleChange}
-          rows={4}
-        />
-
-        <label htmlFor="supplFemme">Supplément femme :</label>
-        <input
-          type="text"
-          id="supplFemme"
+        <label>Supplément femme :</label>
+        <select
           name="supplFemme"
           value={formData.supplFemme}
           onChange={handleChange}
+          required
+        >
+          <option value="">-- Choisir --</option>
+          <option value="O">Oui</option>
+          <option value="N">Non</option>
+        </select>
+
+        <label>Observations :</label>
+        <textarea
+          name="observations"
+          value={formData.observations}
+          onChange={handleChange}
+          rows={3}
+          required
         />
 
         <div className={styles.buttons}>
-          <button type="submit">Envoyer</button>
+          <button type="submit">Enregistrer</button>
           <button type="button" onClick={imprimer} className={styles.printBtn}>
             Imprimer
           </button>
@@ -233,7 +225,6 @@ export default function SaisieConges() {
             className={
               message.includes("succès") ? styles.acceptMsg : styles.rejectMsg
             }
-            style={{ marginTop: "15px", fontWeight: "bold" }}
           >
             {message}
           </p>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import styles from './register.module.css'; // Assure-toi que le fichier CSS s'appelle bien ainsi
+import styles from './register.module.css';
 
 export default function Register() {
   const [matricule, setMatricule] = useState('');
@@ -14,7 +14,7 @@ export default function Register() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
@@ -35,13 +35,29 @@ export default function Register() {
       return;
     }
 
-    setSuccess('Inscription réussie ! Vous pouvez maintenant vous connecter.');
-    setMatricule('');
-    setMail('');
-    setNom('');
-    setPrenom('');
-    setPassword('');
-    setConfirm('');
+    try {
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ matricule, email: mail, nom, prenom, password }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setSuccess('Inscription réussie ! Vous pouvez maintenant vous connecter.');
+        setMatricule('');
+        setMail('');
+        setNom('');
+        setPrenom('');
+        setPassword('');
+        setConfirm('');
+      } else {
+        setError(data.message || 'Erreur lors de l\'inscription.');
+      }
+    } catch (err) {
+      setError('Erreur serveur, veuillez réessayer plus tard.');
+    }
   };
 
   return (

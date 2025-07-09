@@ -1,61 +1,74 @@
 .container {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   padding: 40px 20px;
-  max-width: 600px;
+  max-width: 650px;
   margin: 0 auto;
   background: #f9f9f9;
   border-radius: 12px;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
 }
 
 .title {
   text-align: center;
   color: #076969;
   margin-bottom: 30px;
-  font-size: 24px;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 1.1px;
 }
 
 .form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 22px;
 }
 
 .formGroup label {
-  font-weight: bold;
-  color: #333;
-  margin-bottom: 6px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 8px;
   display: block;
+  font-size: 16px;
 }
 
 .formGroup input {
-  padding: 10px 15px;
-  font-size: 16px;
-  border: 1.5px solid #ccc;
-  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 17px;
+  border: 1.8px solid #b0bec5;
+  border-radius: 10px;
   width: 100%;
+  transition: border-color 0.3s ease;
+}
+
+.formGroup input:focus {
+  outline: none;
+  border-color: #076969;
+  box-shadow: 0 0 8px #076969aa;
 }
 
 .buttons {
   display: flex;
-  gap: 15px;
+  gap: 18px;
   justify-content: center;
-  margin-top: 20px;
+  margin-top: 25px;
 }
 
 .buttonEnvoyer, .buttonRetour {
   background-color: #076969;
   color: white;
-  padding: 10px 20px;
-  font-weight: bold;
+  padding: 12px 28px;
+  font-weight: 700;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 17px;
+  box-shadow: 0 4px 10px rgba(7, 105, 105, 0.3);
+  transition: background-color 0.25s ease;
 }
 
 .buttonRetour {
-  background-color: #999;
+  background-color: #8899a6;
+  box-shadow: 0 4px 10px rgba(136, 153, 166, 0.3);
 }
 
 .buttonEnvoyer:hover {
@@ -63,21 +76,61 @@
 }
 
 .buttonRetour:hover {
-  background-color: #777;
-}
-
-.result {
-  margin-top: 30px;
-  text-align: center;
-}
-
-.salaire {
-  color: green;
-  font-weight: bold;
+  background-color: #6a7a87;
 }
 
 .error {
-  color: red;
-  margin-top: 20px;
+  color: #d32f2f;
+  margin-top: 24px;
   text-align: center;
+  font-weight: 600;
+  font-size: 16px;
+  background: #fdecea;
+  padding: 12px 16px;
+  border-radius: 8px;
+  box-shadow: 0 0 6px #d32f2faa;
+}
+
+.result {
+  margin-top: 35px;
+  text-align: left;
+  display: flex;
+  gap: 28px;
+  justify-content: center;
+  flex-wrap: wrap;
+  font-size: 17px;
+}
+
+.result > div {
+  background: white;
+  border-radius: 12px;
+  padding: 25px 30px;
+  width: 300px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+  color: #2c3e50;
+  line-height: 1.5;
+}
+
+.result h3 {
+  margin-bottom: 18px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #076969;
+  border-bottom: 2px solid #076969;
+  padding-bottom: 6px;
+}
+
+.result p {
+  margin: 8px 0;
+  font-weight: 500;
+}
+
+.result p strong {
+  color: #34495e;
+}
+
+.salaire {
+  color: #27ae60;
+  font-weight: 700;
+  font-size: 18px;
 }

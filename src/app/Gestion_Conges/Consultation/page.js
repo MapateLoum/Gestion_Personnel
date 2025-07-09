@@ -4,73 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./consultation.module.css";
 
-const fakeAgents = {
-  "1234": {
-    nom: "DIALLO",
-    prenom: "Aminata",
-    poste: "Chargée RH",
-    categorie: "A",
-    reg: "Sénégal",
-    dateNaissance: "1985-02-15",
-    dateEmbauche: "2010-07-01",
-    baseHoraire: "40h",
-    conges: [
-      {
-        ref: "C-2023-001",
-        dateDepart: "2023-05-10",
-        medaille: "OUI",
-        reliquat: 5,
-        anciennete: 13,
-        observation: "Congé annuel",
-        dateReference: "2023-01-01",
-        supplFemme: "Oui",
-        matricule: "1234",
-        intercalaire: "Non",
-      },
-      {
-        ref: "C-2024-002",
-        dateDepart: "2024-01-20",
-        medaille: "NON",
-        reliquat: 2,
-        anciennete: 14,
-        observation: "Congé maladie",
-        dateReference: "2024-01-01",
-        supplFemme: "Non",
-        matricule: "1234",
-        intercalaire: "Oui",
-      },
-    ],
-  },
-  "5678": {
-    nom: "NDIAYE",
-    prenom: "Moussa",
-    poste: "Technicien",
-    categorie: "B",
-    reg: "Sénégal",
-    dateNaissance: "1990-10-10",
-    dateEmbauche: "2015-03-12",
-    baseHoraire: "35h",
-    conges: [
-      {
-        ref: "C-2023-010",
-        dateDepart: "2023-06-15",
-        medaille: "NON",
-        reliquat: 0,
-        anciennete: 8,
-        observation: "Congé sans solde",
-        dateReference: "2023-01-01",
-        supplFemme: "Non",
-        matricule: "5678",
-        intercalaire: "Non",
-      },
-    ],
-  },
-};
-
 export default function ConsultationConge() {
   const [matricule, setMatricule] = useState("");
   const [agent, setAgent] = useState(null);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleChange = (e) => {
@@ -79,14 +17,30 @@ export default function ConsultationConge() {
     setAgent(null);
   };
 
-  const handleSearch = (e) => {
+  const handleSearch = async (e) => {
     e.preventDefault();
-    if (fakeAgents[matricule]) {
-      setAgent(fakeAgents[matricule]);
-      setError("");
-    } else {
-      setAgent(null);
-      setError("Aucun agent trouvé avec ce matricule.");
+    if (!matricule.trim()) {
+      setError("Veuillez saisir un matricule.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setAgent(null);
+
+    try {
+      const res = await fetch(`/api/consultation_conge?matricule=${encodeURIComponent(matricule.trim())}`);
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        setAgent(data.agent);
+      } else {
+        setError(data.message || "Erreur lors de la recherche.");
+      }
+    } catch (err) {
+      setError("Erreur réseau, veuillez réessayer.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -119,8 +73,8 @@ export default function ConsultationConge() {
         </div>
 
         <div className={styles.buttons}>
-          <button type="submit" className={styles.buttonEnvoyer}>
-            Rechercher
+          <button type="submit" className={styles.buttonEnvoyer} disabled={loading}>
+            {loading ? "Recherche..." : "Rechercher"}
           </button>
           <button type="button" onClick={handleCancel} className={styles.buttonAnnuler}>
             Annuler
