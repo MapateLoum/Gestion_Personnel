@@ -4,25 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./attestation.module.css";
 
-const agentsFictifs = [
-  {
-    matricule: "A001",
-    nom: "DIOP",
-    prenom: "Mamadou",
-    poste: "Technicien",
-    departement: "Informatique",
-    dateEmbauche: "2019-04-15",
-  },
-  {
-    matricule: "B002",
-    nom: "SOW",
-    prenom: "Awa",
-    poste: "Secrétaire",
-    departement: "Administration",
-    dateEmbauche: "2021-01-10",
-  },
-];
-
 export default function AttestationTravail() {
   const router = useRouter();
 
@@ -30,18 +11,28 @@ export default function AttestationTravail() {
   const [agent, setAgent] = useState(null);
   const [attestationType, setAttestationType] = useState("simple");
   const [errorMsg, setErrorMsg] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const rechercherAgent = (e) => {
+  const rechercherAgent = async (e) => {
     e.preventDefault();
-    const found = agentsFictifs.find(
-      (a) => a.matricule.toLowerCase() === matricule.trim().toLowerCase()
-    );
-    if (found) {
-      setAgent(found);
-      setErrorMsg("");
-    } else {
-      setAgent(null);
-      setErrorMsg("Matricule non trouvé.");
+    setLoading(true);
+    setErrorMsg("");
+    setAgent(null);
+
+    try {
+const res = await fetch(`/api/attestation/${encodeURIComponent(matricule.trim())}`);
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        setAgent(data.agent);
+        setErrorMsg("");
+      } else {
+        setErrorMsg(data.error || "Matricule non trouvé.");
+      }
+    } catch (err) {
+      setErrorMsg("Erreur réseau.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -90,14 +81,16 @@ export default function AttestationTravail() {
             onChange={(e) => setMatricule(e.target.value)}
             className={styles.input}
             required
+            disabled={loading}
           />
-          <button type="submit" className={styles.button}>
-            Rechercher
+          <button type="submit" className={styles.button} disabled={loading}>
+            {loading ? "Recherche..." : "Rechercher"}
           </button>
           <button
             type="button"
             className={`${styles.button} ${styles.buttonAnnuler}`}
             onClick={() => router.back()}
+            disabled={loading}
           >
             Retour
           </button>
@@ -125,11 +118,11 @@ export default function AttestationTravail() {
             <h2>Attestation de Travail</h2>
             <p>
               Je soussigné(e), responsable des ressources humaines de la société,
-              certifie que <strong>{agent.prenom} {agent.nom}</strong>, titulaire du matricule <strong>{agent.matricule}</strong>,
-              occupe le poste de <strong>{agent.poste}</strong> au sein du département <strong>{agent.departement}</strong>.
+              certifie que <strong>{agent.PRENOMS} {agent.NOM}</strong>, titulaire du matricule <strong>{agent.MLE}</strong>,
+              occupe le poste de <strong>{agent.INTITULE_DU_POSE || agent.POSTE || "-"}</strong> au sein du département <strong>{agent.DEPT_DIV_SERV_SUBD || "-"}</strong>.
             </p>
             <p>
-              Date d'embauche : <strong>{new Date(agent.dateEmbauche).toLocaleDateString()}</strong>.
+              Date d'embauche : <strong>{agent.DATE_EMB ? new Date(agent.DATE_EMB).toLocaleDateString() : "-"}</strong>.
             </p>
             {attestationType === "banque" && (
               <p>

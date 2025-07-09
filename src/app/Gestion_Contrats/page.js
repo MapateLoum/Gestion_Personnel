@@ -15,6 +15,7 @@ export default function GestionContrats() {
         <Link href="/Gestion_Contrats/Echeancier" className={styles.link}>📅 Échéancier des Contrats</Link>
         <Link href="/Gestion_Contrats/Renouv_Contrat" className={styles.link}>🔄 Renouvellement CDD2/CDI</Link>
         <Link href="/Gestion_Contrats/Attestation" className={styles.link}>📄 Attestation de Travail</Link>
+        <Link href="/Gestion_Contrats/afficher_pers" className={styles.link}>👁️ Afficher les Personnel</Link>
         <Link href="../Accueil" className={styles.link}>⬅️ Retour au Menu</Link>
       </section>
 
