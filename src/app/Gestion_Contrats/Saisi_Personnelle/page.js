@@ -148,43 +148,71 @@ export default function FormulairePersonnel() {
   const handleGoBack = () => router.back();
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!formData.nom || !formData.prenoms || !formData.matricule) {
-      setMessage("❌ Veuillez remplir au moins le nom, prénom et matricule.");
-      return;
+  if (!formData.nom || !formData.prenoms || !formData.matricule) {
+    setMessage("❌ Veuillez remplir au moins le nom, prénom et matricule.");
+    return;
+  }
+
+  setLoading(true);
+  setMessage("");
+
+  try {
+    // Mappe proprement tes noms
+    const payload = {
+      STE: formData.STE,
+      CODE_SAN: formData.code || null,
+      MLE: formData.matricule,
+      CODE: formData.code || null,
+      NOM: formData.nom,
+      PRENOMS: formData.prenoms,
+      INTITULE_DU_POSE: formData.intituleDuPoste,
+      CODEPOSTE: formData.codePoste,
+      STAT: formData.statut,
+      CODSTAT: formData.codStat,
+      CATEGORIE: formData.categorie,
+      REG: formData.reg,
+      DATE_NAIS: formData.dateNaissance,
+      DATE_EMB: formData.dateEmbauche,
+      DATE_DEP: formData.dateDep,
+      SEXE: formData.sexe,
+      NATION: formData.nation,
+      SF: formData.sf,
+      CONFESSION: formData.confession,
+      PELERINAGE: formData.pelerinage,
+      NBEP: formData.nbreEpouse,
+      NBENF: formData.nbreEnfant,
+      BASE_HORAIRE: formData.baseHoraire,
+      DEPT_DIV_SERV_SUBD: formData.deptDivServSubd,
+      ADRESSE: formData.adresse,
+      FILIATION_: formData.filiation_,
+      FILIATION_2: formData.filiation_2,
+      LIEUNAIS: formData.lieuNaissance,
+      LIEUTRAVAIL: formData.lieutravail,
+      PHOTO: formData.photo
+    };
+
+    const res = await fetch("/api/personnel", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await res.json();
+
+    if (res.ok && data.success) {
+      setMessage("✅ Personnel enregistré avec succès !");
+    } else {
+      setMessage(`❌ Erreur : ${data.error || "Échec de l'enregistrement."}`);
     }
+  } catch (err) {
+    setMessage("❌ Erreur réseau, veuillez réessayer.");
+  } finally {
+    setLoading(false);
+  }
+};
 
-    setLoading(true);
-    setMessage("");
-
-    try {
-      const payload = {
-        ...formData,
-        MLE: formData.matricule || null,
-        CODE: formData.code || null,
-      };
-      delete payload.matricule;
-
-      const res = await fetch("/api/personnel", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await res.json();
-
-      if (res.ok && data.success) {
-        setMessage("✅ Personnel enregistré avec succès !");
-      } else {
-        setMessage(`❌ Erreur : ${data.error || "Échec de l'enregistrement."}`);
-      }
-    } catch (err) {
-      setMessage("❌ Erreur réseau, veuillez réessayer.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <main className={styles.container}>
