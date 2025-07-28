@@ -8,64 +8,32 @@ export default function FormulairePersonnel() {
   const router = useRouter();
 
   const [formData, setFormData] = useState({
+    mle: "",
     STE: "",
-    matricule: "",
-    code: "",
     nom: "",
     prenoms: "",
-    intituleDuPoste: "",
-    poste: "",
-    codePoste: "",
-    statut: "",
-    codStat: "",
+    intituleDuPoste: "", // correspond à INTITULE_DU_POSE en base
     categorie: "",
-    reg: "",
-    dateNaissance: "",
-    dateEmbauche: "",
-    dateDep: "",
-    sexe: "",
-    nation: "",
-    sf: "",
-    confession: "",
-    pelerinage: "",
+    codeSan: "", // correspond à CODE_SAN
     nbreEpouse: "",
     nbreEnfant: "",
-    baseHoraire: "",
-    deptDivServSubd: "",
-    departDivSer: "",
+    filiation_: "",       // prénom du père
+    filiation_2: "",      // nom complet de la mère
     adresse: "",
-    filiation_: "",
-    filiation_2: "",
+    statut: "",
+    reg: "",
+    dateNaissance: "",
     lieuNaissance: "",
-    lieutravail: "",
-    photo: "",
-    nomPere: "",
-    nomMere: "",
+    dateEmbauche: "",
+    sexe: "",
     nationalite: "",
+    sf: "",
+    confession: "",
+    deptDivServSubd: "",
   });
 
-  const [sections, setSections] = useState([]);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    // Charger les sections au montage
-    const fetchSections = async () => {
-      try {
-        const res = await fetch("/api/sections");
-        const data = await res.json();
-        if (res.ok && data.success) {
-          setSections(data.sections);
-        } else {
-          console.error("Erreur lors du chargement des sections");
-        }
-      } catch (err) {
-        console.error("Erreur réseau:", err);
-      }
-    };
-
-    fetchSections();
-  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -115,161 +83,117 @@ export default function FormulairePersonnel() {
   };
 
   const getRensPaieHtml = () => `
-    <p>La société <strong>${formData.STE || "[Nom de la société]"}</strong> confirme que l'agent portant le matricule <strong>${formData.matricule || "[matricule]"}</strong>, nommé <strong>${formData.nom || "[nom]"}</strong> ${formData.prenoms || "[prénom]"}, occupe le poste de <strong>${formData.poste || formData.intituleDuPoste || "[poste]"}</strong>.</p>
-    <p>Il appartient à la catégorie <strong>${formData.categorie || "[catégorie]"}</strong> et est identifié par le code SAN <strong>${formData.codePoste || "[code SAN]"}</strong>.</p>
+    <p>La société <strong>${formData.STE || "[Nom de la société]"}</strong> confirme que l'agent portant le matricule <strong>${formData.mle || "[matricule]"}</strong>, nommé <strong>${formData.nom || "[nom]"}</strong> ${formData.prenoms || "[prénom]"}, occupe le poste de <strong>${formData.intituleDuPoste || "[poste]"}</strong>.</p>
+    <p>Il appartient à la catégorie <strong>${formData.categorie || "[catégorie]"}</strong> et est identifié par le code SAN <strong>${formData.codeSan || "[code SAN]"}</strong>.</p>
   `;
 
   const getNotifEmbaucheHtml = () => `
     <p>Nous informons que <strong>${formData.nom || "[nom]"}</strong> ${formData.prenoms || "[prénom]"}</p>
     <p>a été embauché(e) le <strong>${formData.dateEmbauche || "[date d'embauche]"}</strong>,</p>
-    <p>au poste de <strong>${formData.poste || formData.intituleDuPoste || "[poste]"}</strong>,</p>
-    <p>au sein du département/division/service <strong>${formData.departDivSer || formData.deptDivServSubd || "[département]"}</strong>.</p>
+    <p>au poste de <strong>${formData.intituleDuPoste || "[poste]"}</strong>,</p>
+    <p>au sein du département/division/service <strong>${formData.deptDivServSubd || "[département]"}</strong>.</p>
   `;
 
   const getContratHtml = () => `
     <p>Le présent contrat atteste que <strong>${formData.nom || "[nom]"}</strong> ${formData.prenoms || "[prénom]"}</p>
-    <p>occupe le poste de <strong>${formData.poste || formData.intituleDuPoste || "[poste]"}</strong> dans la catégorie <strong>${formData.categorie || "[catégorie]"}</strong>.</p>
+    <p>occupe le poste de <strong>${formData.intituleDuPoste || "[poste]"}</strong> dans la catégorie <strong>${formData.categorie || "[catégorie]"}</strong>.</p>
     <p>Il/Elle a été embauché(e) le <strong>${formData.dateEmbauche || "[date d'embauche]"}</strong> sous le statut suivant : <strong>${formData.statut || "[statut]"}</strong>.</p>
   `;
 
-  const getAttestationHtml = () => `
-    <p>Nous attestons que <strong>${formData.nom || "[nom]"}</strong> ${formData.prenoms || "[prénom]"}</p>
-    <p>est employé(e) par la société <strong>${formData.STE || "[Nom de la société]"}</strong>,</p>
-    <p>occupant le poste de <strong>${formData.poste || formData.intituleDuPoste || "[poste]"}</strong> depuis le <strong>${formData.dateEmbauche || "[date d'embauche]"}</strong>.</p>
-    <p>Il/Elle fait partie du département/division/service <strong>${formData.departDivSer || formData.deptDivServSubd || "[département]"}</strong>,</p>
-    <p>et son statut est <strong>${formData.statut || "[statut]"}</strong>.</p>
-  `;
 
   const printRensPaie = () => openPrintWindow("Renseignements de paie", getRensPaieHtml());
   const printNotifEmbauche = () => openPrintWindow("Notification d'embauche", getNotifEmbaucheHtml());
   const printContrat = () => openPrintWindow("Contrat de travail", getContratHtml());
-  const printAttestation = () => openPrintWindow("Attestation de travail", getAttestationHtml());
 
   const handleGoBack = () => router.back();
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (!formData.nom || !formData.prenoms || !formData.matricule) {
-    setMessage("❌ Veuillez remplir au moins le nom, prénom et matricule.");
-    return;
-  }
-
-  setLoading(true);
-  setMessage("");
-
-  try {
-    // Mappe proprement tes noms
-    const payload = {
-      STE: formData.STE,
-      CODE_SAN: formData.code || null,
-      MLE: formData.matricule,
-      CODE: formData.code || null,
-      NOM: formData.nom,
-      PRENOMS: formData.prenoms,
-      INTITULE_DU_POSE: formData.intituleDuPoste,
-      CODEPOSTE: formData.codePoste,
-      STAT: formData.statut,
-      CODSTAT: formData.codStat,
-      CATEGORIE: formData.categorie,
-      REG: formData.reg,
-      DATE_NAIS: formData.dateNaissance,
-      DATE_EMB: formData.dateEmbauche,
-      DATE_DEP: formData.dateDep,
-      SEXE: formData.sexe,
-      NATION: formData.nation,
-      SF: formData.sf,
-      CONFESSION: formData.confession,
-      PELERINAGE: formData.pelerinage,
-      NBEP: formData.nbreEpouse,
-      NBENF: formData.nbreEnfant,
-      BASE_HORAIRE: formData.baseHoraire,
-      DEPT_DIV_SERV_SUBD: formData.deptDivServSubd,
-      ADRESSE: formData.adresse,
-      FILIATION_: formData.filiation_,
-      FILIATION_2: formData.filiation_2,
-      LIEUNAIS: formData.lieuNaissance,
-      LIEUTRAVAIL: formData.lieutravail,
-      PHOTO: formData.photo
-    };
-
-    const res = await fetch("/api/personnel", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-
-    const data = await res.json();
-
-    if (res.ok && data.success) {
-      setMessage("✅ Personnel enregistré avec succès !");
-    } else {
-      setMessage(`❌ Erreur : ${data.error || "Échec de l'enregistrement."}`);
+    if (!formData.nom || !formData.prenoms || !formData.mle) {
+      setMessage("❌ Veuillez remplir au moins le nom, prénom et matricule.");
+      return;
     }
-  } catch (err) {
-    setMessage("❌ Erreur réseau, veuillez réessayer.");
-  } finally {
-    setLoading(false);
-  }
-};
 
+    setLoading(true);
+    setMessage("");
+
+    try {
+      const payload = {
+        mle: formData.mle,
+        STE: formData.STE,
+        nom: formData.nom,
+        prenoms: formData.prenoms,
+        intitule_du_poste: formData.intituleDuPoste,
+        categorie: formData.categorie,
+        code_san: formData.codeSan,
+        nbreEpouse: formData.nbreEpouse,
+        nbreEnfant: formData.nbreEnfant,
+        filiation_: formData.filiation_,
+        filiation_2: formData.filiation_2,
+        adresse: formData.adresse,
+        statut: formData.statut,
+        reg: formData.reg,
+        date_naissance: formData.dateNaissance,
+        lieu_naissance: formData.lieuNaissance,
+        date_embauche: formData.dateEmbauche,
+        sexe: formData.sexe,
+        nationalite: formData.nationalite,
+        sf: formData.sf,
+        confession: formData.confession,
+        dept_div_serv_subd: formData.deptDivServSubd,
+      };
+
+      const res = await fetch("/api/personnel", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        setMessage("✅ Personnel enregistré avec succès !");
+      } else {
+        setMessage(`❌ Erreur : ${data.error || "Échec de l'enregistrement."}`);
+      }
+    } catch (err) {
+      setMessage("❌ Erreur réseau, veuillez réessayer.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <main className={styles.container}>
       <h1 className={styles.title}>Formulaire Personnel</h1>
 
       <form onSubmit={handleSubmit} className={styles.form}>
-        {Object.entries(formData).map(([key, value]) => {
-          if (key === "code") {
-            return (
-              <div className={styles.formGroup} key={key}>
-                <label htmlFor={key}>SECTION & BUDGET</label>
-                <select
-                  id={key}
-                  name={key}
-                  className={styles.input}
-                  value={value}
-                  onChange={handleChange}
-                  disabled={loading}
-                  required
-                >
-                  <option value="">-- Sélectionner une section --</option>
-                  {sections.map((section) => (
-                    <option key={section.CODE} value={section.CODE}>
-                      {section.CODE} - {section.INTITULE} (Budget: {section.BUDGET})
-                    </option>
-                  ))}
-                </select>
-              </div>
-            );
-          }
-
-          return (
-            <div className={styles.formGroup} key={key}>
-              <label htmlFor={key}>
-                {key
-                  .replace(/([A-Z])/g, " $1")
-                  .replace(/_/g, " ")
-                  .toUpperCase()}
-              </label>
-              <input
-                type={
-                  key.toLowerCase().includes("date")
-                    ? "date"
-                    : key.toLowerCase().includes("nbre") || key.toLowerCase().includes("nb")
-                    ? "number"
-                    : "text"
-                }
-                id={key}
-                name={key}
-                className={styles.input}
-                value={value}
-                onChange={handleChange}
-                disabled={loading}
-              />
-            </div>
-          );
-        })}
+        {Object.entries(formData).map(([key, value]) => (
+          <div className={styles.formGroup} key={key}>
+            <label htmlFor={key}>
+              {key
+                .replace(/([A-Z])/g, " $1")
+                .replace(/_/g, " ")
+                .toUpperCase()}
+            </label>
+            <input
+              type={
+                key.toLowerCase().includes("date")
+                  ? "date"
+                  : key.toLowerCase().includes("nbre") || key.toLowerCase().includes("nb")
+                  ? "number"
+                  : "text"
+              }
+              id={key}
+              name={key}
+              className={styles.input}
+              value={value}
+              onChange={handleChange}
+              disabled={loading}
+            />
+          </div>
+        ))}
 
         <div className={styles.buttons}>
           <button type="submit" className={styles.submitBtn} disabled={loading}>
@@ -279,13 +203,10 @@ export default function FormulairePersonnel() {
             Rens. Paie
           </button>
           <button type="button" onClick={printNotifEmbauche} className={styles.printBtn} disabled={loading}>
-            Notif Embauche
+            Notif. Embauche
           </button>
           <button type="button" onClick={printContrat} className={styles.printBtn} disabled={loading}>
-            Contrat
-          </button>
-          <button type="button" onClick={printAttestation} className={styles.printBtn} disabled={loading}>
-            Attestation
+            Contrat de travail
           </button>
           <button type="button" onClick={handleGoBack} className={styles.buttonRetour}>
             Retour

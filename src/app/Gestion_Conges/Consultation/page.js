@@ -106,13 +106,12 @@ export default function ConsultationConge() {
                 <tr>
                   <th>Réf.</th>
                   <th>Date départ</th>
+                  <th>Date retour</th>
                   <th>Médaille</th>
                   <th>Reliquat</th>
                   <th>Ancienneté</th>
                   <th>Observation</th>
-                  <th>Date référence</th>
                   <th>Supplément femme</th>
-                  <th>Matricule</th>
                   <th>Intercalaire</th>
                 </tr>
               </thead>
@@ -121,13 +120,12 @@ export default function ConsultationConge() {
                   <tr key={i}>
                     <td>{conge.ref}</td>
                     <td>{conge.dateDepart}</td>
+                    <td>{conge.dateRetour}</td>
                     <td>{conge.medaille}</td>
                     <td>{conge.reliquat}</td>
                     <td>{conge.anciennete}</td>
                     <td>{conge.observation}</td>
-                    <td>{conge.dateReference}</td>
                     <td>{conge.supplFemme}</td>
-                    <td>{conge.matricule}</td>
                     <td>{conge.intercalaire}</td>
                   </tr>
                 ))}

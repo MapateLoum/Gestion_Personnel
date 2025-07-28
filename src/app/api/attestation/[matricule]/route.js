@@ -3,8 +3,8 @@
 import mysql from "mysql2/promise";
 import { NextResponse } from "next/server";
 
-export async function GET(request, { params }) {
-  const { matricule } = params;
+export async function GET(request, context) {
+  const { matricule } = context.params; // ✅ Bonne façon de récupérer le paramètre dynamique
 
   try {
     const connection = await mysql.createConnection({
@@ -16,7 +16,7 @@ export async function GET(request, { params }) {
 
     const [rows] = await connection.execute(
       `SELECT * FROM pers WHERE MLE = ? LIMIT 1`,
-      [matricule]
+      [matricule.toUpperCase()] // facultatif : standardiser en majuscules
     );
 
     await connection.end();

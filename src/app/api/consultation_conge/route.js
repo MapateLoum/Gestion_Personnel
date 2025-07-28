@@ -23,7 +23,7 @@ export async function GET(request) {
 
     const connection = await mysql.createConnection(dbConfig);
 
-    // Requête pour infos agent
+    // Requête pour infos de l'agent
     const [persRows] = await connection.execute(
       `SELECT MLE, NOM, PRENOMS, INTITULE_DU_POSE AS poste, CATEGORIE, REG, DATE_NAIS, DATE_EMB, BASE_HORAIRE 
        FROM pers WHERE MLE = ?`,
@@ -40,11 +40,15 @@ export async function GET(request) {
 
     const agent = persRows[0];
 
-    // Requête pour congés de l'agent
+    // Requête pour les congés triés par REF décroissant
     const [congesRows] = await connection.execute(
-      `SELECT REF AS ref, DDEPART AS dateDepart, NJMEDAILLE AS medaille, RELIQT AS reliquat, NJANC AS anciennete,
-              OBSERVATIONS AS observation, DTA_RET_EFF AS dateReference, SUPPF AS supplFemme, MLE AS matricule, INTERC AS intercalaire
-       FROM conges WHERE MLE = ? ORDER BY DDEPART DESC`,
+      `SELECT REF AS ref, DDEPART AS dateDepart, DDRETOUR AS dateRetour,
+              NJMEDAILLE AS medaille, RELIQT AS reliquat, NJANC AS anciennete,
+              OBSERVATIONS AS observation, DTA_RET_EFF AS dateReference,
+              SUPPF AS supplFemme, INTERC AS intercalaire
+       FROM conges
+       WHERE MLE = ?
+       ORDER BY REF ASC`,
       [matricule]
     );
 
@@ -61,13 +65,17 @@ export async function GET(request) {
         dateNaissance: agent.DATE_NAIS ? agent.DATE_NAIS.toISOString().slice(0, 10) : null,
         dateEmbauche: agent.DATE_EMB ? agent.DATE_EMB.toISOString().slice(0, 10) : null,
         baseHoraire: agent.BASE_HORAIRE?.toString() || null,
-        conges: congesRows.map(c => ({
-          ...c,
+        conges: congesRows.map((c) => ({
+          ref: c.ref,
           dateDepart: c.dateDepart ? c.dateDepart.toISOString().slice(0, 10) : null,
+          dateRetour: c.dateRetour ? c.dateRetour.toISOString().slice(0, 10) : null,
           dateReference: c.dateReference ? c.dateReference.toISOString().slice(0, 10) : null,
-          medaille: c.medaille === 1 ? "OUI" : "NON", // converti int en texte
+          anciennete: c.anciennete,
+          reliquat: c.reliquat,
+          medaille: c.medaille === 1 ? "OUI" : "NON",
           supplFemme: c.supplFemme === "O" || c.supplFemme === "o" ? "Oui" : "Non",
           intercalaire: c.intercalaire === "O" || c.intercalaire === "o" ? "Oui" : "Non",
+          observation: c.observation
         })),
       },
     });

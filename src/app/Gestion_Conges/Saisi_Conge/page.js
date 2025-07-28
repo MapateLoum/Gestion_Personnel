@@ -31,14 +31,16 @@ export default function SaisieConges() {
     e.preventDefault();
     setMessage("");
 
-    // Vérifier que tout est rempli
-    const allFilled = Object.values(formData).every((val) => val.trim() !== "");
+    // Vérifier que tous les champs sont remplis
+    const allFilled = Object.values(formData).every(
+      (val) => val !== null && val.toString().trim() !== ""
+    );
     if (!allFilled) {
       setMessage("Tous les champs doivent être remplis avant d'envoyer.");
       return;
     }
 
-    // Vérifier dates
+    // Vérifier dates côté client (optionnel)
     const dateDepart = new Date(formData.dateDepart);
     const dateRetour = new Date(formData.dateRetour);
     if (dateDepart >= dateRetour) {
@@ -54,10 +56,16 @@ export default function SaisieConges() {
       });
 
       const data = await res.json();
-      if (data.success) {
+
+      if (res.ok) {
         setMessage("Congé enregistré avec succès !");
+        // Optionnel : reset form
+        // setFormData({ matricule: "", anciennete: "", dateDepart: "", dateRetour: "", medaille: "", reliquat: "", intercalaire: "", observations: "", supplFemme: "" });
+      } else if (res.status === 409) {
+        // Conflit chevauchement dates
+        setMessage(data.message || "Erreur : chevauchement de congé.");
       } else {
-        setMessage("Erreur serveur, veuillez réessayer.");
+        setMessage(data.message || "Erreur serveur, veuillez réessayer.");
       }
     } catch (err) {
       console.error(err);
@@ -181,28 +189,24 @@ export default function SaisieConges() {
         />
 
         <label>Intercalaire :</label>
-        <select
+        <input
+          type="number"
           name="intercalaire"
+          min="0"
           value={formData.intercalaire}
           onChange={handleChange}
           required
-        >
-          <option value="">-- Choisir --</option>
-          <option value="O">Oui</option>
-          <option value="N">Non</option>
-        </select>
+        />
 
-        <label>Supplément femme :</label>
-        <select
+        <label>Supp. Femme :</label>
+        <input
+          type="number"
           name="supplFemme"
+          min="0"
           value={formData.supplFemme}
           onChange={handleChange}
           required
-        >
-          <option value="">-- Choisir --</option>
-          <option value="O">Oui</option>
-          <option value="N">Non</option>
-        </select>
+        />
 
         <label>Observations :</label>
         <textarea
@@ -215,7 +219,11 @@ export default function SaisieConges() {
 
         <div className={styles.buttons}>
           <button type="submit">Enregistrer</button>
-          <button type="button" onClick={imprimer} className={styles.printBtn}>
+          <button
+            type="button"
+            onClick={imprimer}
+            className={styles.printBtn}
+          >
             Imprimer
           </button>
         </div>
@@ -223,7 +231,9 @@ export default function SaisieConges() {
         {message && (
           <p
             className={
-              message.includes("succès") ? styles.acceptMsg : styles.rejectMsg
+              message.toLowerCase().includes("succès")
+                ? styles.acceptMsg
+                : styles.rejectMsg
             }
           >
             {message}
