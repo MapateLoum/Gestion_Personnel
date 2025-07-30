@@ -1,22 +1,40 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import styles from './login.module.css';
+
+function Toast({ message, onClose }) {
+  useEffect(() => {
+    if (!message) return;
+    const timer = setTimeout(() => {
+      onClose();
+    }, 4000); // 4 secondes visibles
+    return () => clearTimeout(timer);
+  }, [message, onClose]);
+
+  if (!message) return null;
+
+  return (
+    <div className={styles.toast}>
+      {message}
+    </div>
+  );
+}
 
 export default function Login() {
   const router = useRouter();
   const [matricule, setMatricule] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [toastMsg, setToastMsg] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setToastMsg('');
 
     if (!matricule || !password) {
-      setError('Veuillez remplir tous les champs.');
+      setToastMsg('Veuillez remplir tous les champs.');
       return;
     }
 
@@ -33,10 +51,10 @@ export default function Login() {
         document.cookie = "isLoggedIn=true; path=/; max-age=3600";
         router.push('/Accueil');
       } else {
-        setError(data.message);
+        setToastMsg(data.message);
       }
     } catch (err) {
-      setError('Erreur serveur, veuillez réessayer plus tard.');
+      setToastMsg('Erreur serveur, veuillez réessayer plus tard.');
     }
   };
 
@@ -52,8 +70,6 @@ export default function Login() {
 
       <section className={styles.formSection}>
         <form onSubmit={handleSubmit} className={styles.form} noValidate>
-          {error && <p className={styles.error}>{error}</p>}
-
           <label htmlFor="matricule" className={styles.label}>Matricule</label>
           <input
             type="text"
@@ -90,6 +106,9 @@ export default function Login() {
       <footer className={styles.loginFooter}>
         <p>© 2025 Industries Chimiques du Sénégal - Tous droits réservés</p>
       </footer>
+
+      {/* Toast message */}
+      <Toast message={toastMsg} onClose={() => setToastMsg('')} />
     </main>
   );
 }
