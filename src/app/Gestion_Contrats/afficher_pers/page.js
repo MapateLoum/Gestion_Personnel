@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./afficher_pers.module.css";
-
 export default function AfficherPersonnel() {
   const router = useRouter();
 
@@ -12,7 +11,12 @@ export default function AfficherPersonnel() {
   const [message, setMessage] = useState("");
   const [searchMatricule, setSearchMatricule] = useState("");
   const [filteredPersonnels, setFilteredPersonnels] = useState([]);
-
+useEffect(() => {
+  if (message) {
+    const timer = setTimeout(() => setMessage(""), 5000);
+    return () => clearTimeout(timer);
+  }
+}, [message]);
   // Chargement initial de tout le personnel
   const fetchPersonnels = async () => {
     setLoading(true);
@@ -128,7 +132,9 @@ export default function AfficherPersonnel() {
       </div>
 
       {loading && <p>Chargement...</p>}
-      {message && <p>{message}</p>}
+      {message && (
+  <div className={styles.toast}>{message}</div>
+)}
 
       {!loading && filteredPersonnels.length > 0 && (
         <>

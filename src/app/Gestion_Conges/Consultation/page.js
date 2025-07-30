@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./consultation.module.css";
-
+import { useEffect } from "react";
 export default function ConsultationConge() {
   const [matricule, setMatricule] = useState("");
   const [agent, setAgent] = useState(null);
@@ -43,7 +43,14 @@ export default function ConsultationConge() {
       setLoading(false);
     }
   };
-
+useEffect(() => {
+  if (error) {
+    const timer = setTimeout(() => {
+      setError("");
+    }, 5000);
+    return () => clearTimeout(timer);
+  }
+}, [error]);
   const handleCancel = () => {
     setMatricule("");
     setAgent(null);
@@ -84,7 +91,12 @@ export default function ConsultationConge() {
           </button>
         </div>
 
-        {error && <p className={styles.errorMessage}>{error}</p>}
+{error && (
+  <div className={styles.fixedMessage} role="alert" aria-live="assertive">
+    {error}
+  </div>
+)}
+
       </form>
 
       {agent && (

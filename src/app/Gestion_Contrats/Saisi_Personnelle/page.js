@@ -40,6 +40,14 @@ export default function FormulairePersonnel() {
     setFormData((prev) => ({ ...prev, [name]: value }));
     setMessage("");
   };
+useEffect(() => {
+  if (message) {
+    const timer = setTimeout(() => {
+      setMessage("");
+    }, 5000);
+    return () => clearTimeout(timer);
+  }
+}, [message]);
 
   const openPrintWindow = (title, contentHtml) => {
     const printWindow = window.open("", "", "width=800,height=600");
@@ -214,10 +222,17 @@ export default function FormulairePersonnel() {
         </div>
 
         {message && (
-          <p className={message.startsWith("✅") ? styles.successMsg : styles.errorMsg}>
-            {message}
-          </p>
-        )}
+  <div
+    className={`${styles.messagePopup} ${
+      message.startsWith("✅") ? styles.successMsg : styles.errorMsg
+    }`}
+    role="alert"
+    aria-live="assertive"
+  >
+    {message}
+  </div>
+)}
+
       </form>
     </main>
   );

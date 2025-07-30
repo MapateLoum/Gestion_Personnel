@@ -141,3 +141,40 @@
   font-weight: bold;
   margin-top: 15px;
 }
+
+.messagePopup {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  padding: 14px 22px;
+  border-radius: 6px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+  animation: fadeOut 5s ease-in-out forwards;
+  font-size: 15px;
+}
+
+.successMsg {
+  background-color: rgba(0, 128, 0, 0.9);
+  color: white;
+}
+
+.errorMsg {
+  background-color: rgba(200, 0, 0, 0.9);
+  color: white;
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}

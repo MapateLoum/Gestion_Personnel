@@ -127,3 +127,53 @@
   margin: 6px 0;
 }
 
+/* Message fixe en bas à gauche */
+.fixedMessage {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  max-width: 300px;
+  padding: 15px 20px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 16px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  color: white;
+  user-select: none;
+  /* Couleur par défaut */
+  background-color: #d9534f; /* rouge erreur */
+  transition: background-color 0.3s ease;
+}
+
+/* Couleur verte quand message de succès */
+.fixedMessage {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background-color: rgba(255, 255, 255, 0.95);
+  color: #8b0000;
+  border: 2px solid #8b0000;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: bold;
+  z-index: 1000;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  animation: slideIn 0.3s ease-in-out;
+}
+
+.success {
+  color: #076969;
+  border-color: #076969;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

@@ -135,3 +135,162 @@
   border-color: #076969;
   outline: none;
 }
+
+.container {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  padding: 40px 20px;
+  max-width: 600px;
+  margin: 0 auto;
+  background: #f9f9f9;
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.header {
+  margin-bottom: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header h1 {
+  color: #076969;
+  font-size: 28px;
+  margin: 0;
+}
+
+.backLink {
+  color: #8B0000;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.backLink:hover {
+  text-decoration: underline;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  text-align: left;
+}
+
+.form label {
+  font-weight: 600;
+  color: #076969;
+  margin-bottom: 6px;
+  display: block;
+}
+
+.form input[type="text"],
+.form input[type="number"],
+.form input[type="date"],
+.form textarea {
+  padding: 10px 15px;
+  font-size: 16px;
+  border: 1.5px solid #ccc;
+  border-radius: 8px;
+  transition: border-color 0.3s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.form input[type="text"]:focus,
+.form input[type="number"]:focus,
+.form input[type="date"]:focus,
+.form textarea:focus {
+  border-color: #076969;
+  outline: none;
+}
+
+.form textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+.buttons {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.form button {
+  background-color: #076969;
+  color: white;
+  font-weight: 700;
+  font-size: 18px;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(7, 105, 105, 0.6);
+  transition: background-color 0.3s ease;
+}
+
+.form button:hover {
+  background-color: #054f4f;
+}
+
+.printBtn {
+  background-color: #8b0000;
+  box-shadow: 0 4px 10px rgba(139, 0, 0, 0.6);
+}
+
+.printBtn:hover {
+  background-color: #5a0000;
+}
+
+.agentInfo {
+  background-color: #e6f7f7;
+  border: 1.5px solid #076969;
+  border-radius: 10px;
+  padding: 20px;
+  margin-top: 15px;
+  color: #333;
+  font-size: 16px;
+}
+
+.agentInfo h3 {
+  margin-top: 0;
+  color: #076969;
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.agentInfo p {
+  margin: 6px 0;
+}
+.fixedMessage {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background-color: rgba(255, 255, 255, 0.95);
+  color: #8b0000;
+  border: 2px solid #8b0000;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: bold;
+  z-index: 1000;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  animation: slideIn 0.3s ease-in-out;
+}
+
+.success {
+  color: #076969;
+  border-color: #076969;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

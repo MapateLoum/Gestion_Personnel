@@ -126,3 +126,31 @@
 .agentInfo p strong {
   color: #076969;
 }
+.popupMessage {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  padding: 14px 20px;
+  border-radius: 6px;
+  background-color: rgba(200, 0, 0, 0.9);
+  color: white;
+  font-weight: 500;
+  font-size: 14px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+  animation: fadeOut 5s ease-in-out forwards;
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}

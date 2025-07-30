@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./attestation.module.css";
-
+import { useEffect } from "react";
 export default function Attestation() {
   const router = useRouter();
 
@@ -12,7 +12,14 @@ export default function Attestation() {
   const [agent, setAgent] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
   const [loading, setLoading] = useState(false);
-
+useEffect(() => {
+  if (errorMsg) {
+    const timer = setTimeout(() => {
+      setErrorMsg("");
+    }, 5000);
+    return () => clearTimeout(timer);
+  }
+}, [errorMsg]);
   const rechercherAgent = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -237,7 +244,12 @@ body {
             Retour
           </button>
 
-          {errorMsg && <p className={styles.error}>{errorMsg}</p>}
+{errorMsg && (
+  <div className={styles.popupMessage} role="alert" aria-live="assertive">
+    {errorMsg}
+  </div>
+)}
+
         </form>
       )}
 

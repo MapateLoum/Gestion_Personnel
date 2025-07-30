@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import styles from "./saisi.module.css";
 
@@ -17,34 +17,94 @@ export default function SaisieConges() {
     supplFemme: "",
   });
 
+  const [agentInfo, setAgentInfo] = useState(null);
   const [message, setMessage] = useState("");
+
+  // Appelle l'API quand matricule change et n'est pas vide
+  useEffect(() => {
+    async function fetchAgent() {
+      if (!formData.matricule.trim()) {
+        setAgentInfo(null);
+        setFormData((prev) => ({ ...prev, anciennete: "" }));
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/personnel/infos/${encodeURIComponent(formData.matricule.trim())}`);
+        const data = await res.json();
+
+        if (res.ok && data.found) {
+          const agent = data.agent;
+
+          setAgentInfo({
+            matricule: agent.MLE,
+            nom: agent.NOM,
+            prenoms: agent.PRENOMS,
+            poste: agent.INTITULE_DU_POSE,
+            categorie: agent.CATEGORIE,  // <-- ajouté ici
+            age: agent.age,              // <-- ajouté ici
+            date_embauche: agent.DATE_EMB,
+          });
+
+          // Calcul ancienneté (en années)
+          const embaucheDate = new Date(agent.DATE_EMB);
+          const now = new Date();
+          let diff = now.getFullYear() - embaucheDate.getFullYear();
+          const m = now.getMonth() - embaucheDate.getMonth();
+          if (m < 0 || (m === 0 && now.getDate() < embaucheDate.getDate())) diff--;
+
+          setFormData((prev) => ({
+            ...prev,
+            anciennete: diff >= 0 ? diff.toString() : "0",
+          }));
+          setMessage("");
+        } else {
+          setAgentInfo(null);
+          setFormData((prev) => ({ ...prev, anciennete: "" }));
+          setMessage("Aucun agent trouvé avec ce matricule.");
+        }
+      } catch (err) {
+        console.error(err);
+        setAgentInfo(null);
+        setFormData((prev) => ({ ...prev, anciennete: "" }));
+        setMessage("Erreur lors de la récupération des données.");
+      }
+    }
+
+    fetchAgent();
+  }, [formData.matricule]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setMessage("");
   };
+useEffect(() => {
+  if (message) {
+    const timer = setTimeout(() => {
+      setMessage("");
+    }, 5000); // disparaît après 5 secondes
+
+    return () => clearTimeout(timer); // nettoyage
+  }
+}, [message]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setMessage("");
 
-    // Vérifier que tous les champs sont remplis
-    const allFilled = Object.values(formData).every(
-      (val) => val !== null && val.toString().trim() !== ""
-    );
-    if (!allFilled) {
-      setMessage("Tous les champs doivent être remplis avant d'envoyer.");
+    // Vérification basique
+    if (!formData.matricule.trim()) {
+      setMessage("Le matricule est obligatoire.");
       return;
     }
 
-    // Vérifier dates côté client (optionnel)
-    const dateDepart = new Date(formData.dateDepart);
-    const dateRetour = new Date(formData.dateRetour);
-    if (dateDepart >= dateRetour) {
-      setMessage("La date de départ doit être antérieure à la date de retour.");
+    if (!formData.dateDepart || !formData.dateRetour) {
+      setMessage("Les dates de départ et retour sont obligatoires.");
+      return;
+    }
+
+    if (new Date(formData.dateDepart) >= new Date(formData.dateRetour)) {
+      setMessage("La date de départ doit être avant la date de retour.");
       return;
     }
 
@@ -54,21 +114,27 @@ export default function SaisieConges() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-
       const data = await res.json();
 
-      if (res.ok) {
+      if (res.ok && data.success) {
         setMessage("Congé enregistré avec succès !");
-        // Optionnel : reset form
-        // setFormData({ matricule: "", anciennete: "", dateDepart: "", dateRetour: "", medaille: "", reliquat: "", intercalaire: "", observations: "", supplFemme: "" });
-      } else if (res.status === 409) {
-        // Conflit chevauchement dates
-        setMessage(data.message || "Erreur : chevauchement de congé.");
+        setFormData({
+          matricule: "",
+          anciennete: "",
+          dateDepart: "",
+          dateRetour: "",
+          medaille: "",
+          reliquat: "",
+          intercalaire: "",
+          observations: "",
+          supplFemme: "",
+        });
+        setAgentInfo(null);
       } else {
-        setMessage(data.message || "Erreur serveur, veuillez réessayer.");
+        setMessage(data.message || "Erreur lors de l'enregistrement.");
       }
-    } catch (err) {
-      console.error(err);
+    } catch (error) {
+      console.error(error);
       setMessage("Erreur réseau, veuillez réessayer.");
     }
   };
@@ -88,32 +154,26 @@ export default function SaisieConges() {
 
     const content = `
       <h2>Attestation Administrative de Congés</h2>
-      <p>Matricule: <strong>${matricule}</strong></p>
-      <p>Ancienneté: <strong>${anciennete}</strong> ans</p>
+      <p>Matricule : <strong>${matricule}</strong></p>
+      <p>Ancienneté : <strong>${anciennete}</strong> ans</p>
       <p>Du <strong>${dateDepart}</strong> au <strong>${dateRetour}</strong></p>
       <ul>
-        <li>Médaille: ${medaille}</li>
-        <li>Reliquat: ${reliquat}</li>
-        <li>Intercalaire: ${intercalaire}</li>
-        <li>Supplément femme: ${supplFemme}</li>
+        <li>Médaille : ${medaille}</li>
+        <li>Reliquat : ${reliquat}</li>
+        <li>Intercalaire : ${intercalaire}</li>
+        <li>Supplément femme : ${supplFemme}</li>
       </ul>
-      <p>Observations: ${observations}</p>
+      <p>Observations : ${observations}</p>
       <p>Fait le ${new Date().toLocaleDateString()}</p>
     `;
 
     const printWindow = window.open("", "", "width=800,height=600");
     printWindow.document.write(`
       <html>
-        <head>
-          <title>Impression Congés</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 20px; }
-            h2 { text-align: center; }
-          </style>
+        <head><title>Impression Congés</title>
+        <style>body { font-family: Arial, sans-serif; padding: 20px; }</style>
         </head>
-        <body>
-          ${content}
-        </body>
+        <body>${content}</body>
       </html>
     `);
     printWindow.document.close();
@@ -126,9 +186,7 @@ export default function SaisieConges() {
     <main className={styles.container}>
       <header className={styles.header}>
         <h1>Saisie des congés</h1>
-        <Link href="/Gestion_Conges" className={styles.backLink}>
-          ← Retour
-        </Link>
+        <Link href="/Gestion_Conges" className={styles.backLink}>← Retour</Link>
       </header>
 
       <form className={styles.form} onSubmit={handleSubmit}>
@@ -141,11 +199,22 @@ export default function SaisieConges() {
           required
         />
 
+        {agentInfo && (
+          <div className={styles.agentInfo}>
+            <p><strong>Nom :</strong> {agentInfo.nom}</p>
+            <p><strong>Prénoms :</strong> {agentInfo.prenoms}</p>
+            <p><strong>Poste :</strong> {agentInfo.poste}</p>
+            <p><strong>Catégorie :</strong> {agentInfo.categorie}</p>
+            <p><strong>Âge :</strong> {agentInfo.age} ans</p>
+            <p><strong>Date embauche :</strong> {agentInfo.date_embauche}</p>
+          </div>
+        )}
+
         <label>Ancienneté (années) :</label>
         <input
           type="number"
           name="anciennete"
-          min="0"
+          min="1"
           value={formData.anciennete}
           onChange={handleChange}
           required
@@ -176,7 +245,6 @@ export default function SaisieConges() {
           min="0"
           value={formData.medaille}
           onChange={handleChange}
-          required
         />
 
         <label>Reliquat :</label>
@@ -185,7 +253,6 @@ export default function SaisieConges() {
           name="reliquat"
           value={formData.reliquat}
           onChange={handleChange}
-          required
         />
 
         <label>Intercalaire :</label>
@@ -195,50 +262,38 @@ export default function SaisieConges() {
           min="0"
           value={formData.intercalaire}
           onChange={handleChange}
-          required
         />
 
-        <label>Supp. Femme :</label>
+        <label>Supplément femme :</label>
         <input
           type="number"
           name="supplFemme"
           min="0"
           value={formData.supplFemme}
           onChange={handleChange}
-          required
         />
 
         <label>Observations :</label>
         <textarea
           name="observations"
+          rows={3}
           value={formData.observations}
           onChange={handleChange}
-          rows={3}
-          required
         />
 
         <div className={styles.buttons}>
           <button type="submit">Enregistrer</button>
-          <button
-            type="button"
-            onClick={imprimer}
-            className={styles.printBtn}
-          >
+          <button type="button" onClick={imprimer} className={styles.printBtn}>
             Imprimer
           </button>
         </div>
 
-        {message && (
-          <p
-            className={
-              message.toLowerCase().includes("succès")
-                ? styles.acceptMsg
-                : styles.rejectMsg
-            }
-          >
-            {message}
-          </p>
-        )}
+       {message && (
+  <div className={`${styles.fixedMessage} ${message.includes("succès") ? styles.acceptMsg : styles.rejectMsg}`}>
+    {message}
+  </div>
+)}
+
       </form>
     </main>
   );

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./modif.module.css";
+import { useEffect } from "react";
 
 export default function ModifierPersonnel() {
   const router = useRouter();
@@ -42,6 +43,15 @@ export default function ModifierPersonnel() {
     setFormData((prev) => ({ ...prev, [name]: value }));
     setMessage("");
   };
+
+  useEffect(() => {
+  if (message) {
+    const timer = setTimeout(() => {
+      setMessage("");
+    }, 5000);
+    return () => clearTimeout(timer);
+  }
+}, [message]);
 
   const handleSearch = async () => {
     if (!formData.mle) {
@@ -217,8 +227,11 @@ export default function ModifierPersonnel() {
         </div>
 
         {message && (
-          <p className={message.startsWith("✅") ? styles.successMsg : styles.errorMsg}>{message}</p>
-        )}
+  <div className={styles.toast}>
+    {message}
+  </div>
+)}
+
       </form>
     </main>
   );

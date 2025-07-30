@@ -1,4 +1,3 @@
-// src/app/api/modif_conge/route.js
 import { NextResponse } from "next/server";
 import mysql from "mysql2/promise";
 
@@ -9,14 +8,15 @@ const dbConfig = {
   database: "stage",
 };
 
-// ✅ GET ➜ Récupérer un congé + info agent
+// GET : récupère conge + agent selon REF OU matricule (REF prioritaire)
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
+  const ref = searchParams.get("ref");
   const matricule = searchParams.get("matricule");
 
-  if (!matricule) {
+  if (!ref && !matricule) {
     return NextResponse.json(
-      { success: false, message: "Matricule requis." },
+      { success: false, message: "REF ou matricule requis." },
       { status: 400 }
     );
   }
@@ -24,11 +24,18 @@ export async function GET(request) {
   try {
     const connection = await mysql.createConnection(dbConfig);
 
-    // Récupérer le congé
-    const [congeRows] = await connection.execute(
-      "SELECT * FROM conges WHERE MLE = ? LIMIT 1",
-      [matricule]
-    );
+    let congeRows = [];
+    if (ref) {
+      [congeRows] = await connection.execute(
+        "SELECT * FROM conges WHERE REF = ? LIMIT 1",
+        [ref]
+      );
+    } else if (matricule) {
+      [congeRows] = await connection.execute(
+        "SELECT * FROM conges WHERE MLE = ? LIMIT 1",
+        [matricule]
+      );
+    }
 
     if (congeRows.length === 0) {
       await connection.end();
@@ -40,16 +47,13 @@ export async function GET(request) {
 
     const conge = congeRows[0];
 
-    // Récupérer l’agent
+    // Récupérer l'agent lié
     const [persRows] = await connection.execute(
       "SELECT MLE, NOM, PRENOMS, INTITULE_DU_POSE, CATEGORIE, DATE_EMB FROM pers WHERE MLE = ? LIMIT 1",
-      [matricule]
+      [conge.MLE]
     );
 
-    let pers = null;
-    if (persRows.length > 0) {
-      pers = persRows[0];
-    }
+    const pers = persRows.length > 0 ? persRows[0] : null;
 
     await connection.end();
 
@@ -63,11 +67,12 @@ export async function GET(request) {
   }
 }
 
-// ✅ PUT ➜ Mettre à jour un congé
+// PUT : mettre à jour un congé via REF
 export async function PUT(request) {
   try {
     const body = await request.json();
     const {
+      REF,
       matricule,
       anciennete,
       dateDepart,
@@ -79,9 +84,9 @@ export async function PUT(request) {
       observations,
     } = body;
 
-    if (!matricule) {
+    if (!REF) {
       return NextResponse.json(
-        { success: false, message: "Matricule obligatoire." },
+        { success: false, message: "Référence congé obligatoire." },
         { status: 400 }
       );
     }
@@ -91,6 +96,7 @@ export async function PUT(request) {
     const sql = `
       UPDATE conges
       SET
+        MLE = ?,
         NJANC = ?,
         DDEPART = ?,
         DDRETOUR = ?,
@@ -99,10 +105,11 @@ export async function PUT(request) {
         INTERC = ?,
         SUPPF = ?,
         OBSERVATIONS = ?
-      WHERE MLE = ?
+      WHERE REF = ?
     `;
 
     const values = [
+      matricule || null,
       anciennete || null,
       dateDepart || null,
       dateRetour || null,
@@ -111,15 +118,16 @@ export async function PUT(request) {
       intercalaire || null,
       supplFemme || null,
       observations || null,
-      matricule,
+      REF,
     ];
 
     const [result] = await connection.execute(sql, values);
+
     await connection.end();
 
     if (result.affectedRows === 0) {
       return NextResponse.json(
-        { success: false, message: "Aucun congé trouvé pour ce matricule." },
+        { success: false, message: "Aucun congé trouvé pour cette référence." },
         { status: 404 }
       );
     }
@@ -133,3 +141,4 @@ export async function PUT(request) {
     );
   }
 }
+
