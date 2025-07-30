@@ -1,9 +1,36 @@
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from 'next/link';
 import styles from './contrat.module.css';  // CSS module
 import Footer from '../../../components/Footer';
 import Header from '../../../components/Header';
 
 export default function GestionContrats() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const isLoggedIn = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("isLoggedIn="))
+      ?.split("=")[1];
+
+    if (isLoggedIn !== "true") {
+      router.replace("/login");
+    }
+
+    window.onpopstate = () => {
+      const loggedIn = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("isLoggedIn="))
+        ?.split("=")[1];
+      if (loggedIn !== "true") {
+        router.replace("/login");
+      }
+    };
+  }, [router]);
+
   return (
     <main className={styles.container}>
       <Header />

@@ -1,15 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./consultation.module.css";
-import { useEffect } from "react";
+
 export default function ConsultationConge() {
   const [matricule, setMatricule] = useState("");
   const [agent, setAgent] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  // Protection isLoggedIn
+  useEffect(() => {
+    const isLoggedIn = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("isLoggedIn="))
+      ?.split("=")[1];
+
+    if (isLoggedIn !== "true") {
+      router.replace("/login");
+    }
+
+    window.onpopstate = () => {
+      const loggedIn = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("isLoggedIn="))
+        ?.split("=")[1];
+      if (loggedIn !== "true") {
+        router.replace("/login");
+      }
+    };
+  }, [router]);
 
   const handleChange = (e) => {
     setMatricule(e.target.value);
@@ -29,7 +51,9 @@ export default function ConsultationConge() {
     setAgent(null);
 
     try {
-      const res = await fetch(`/api/consultation_conge?matricule=${encodeURIComponent(matricule.trim())}`);
+      const res = await fetch(
+        `/api/consultation_conge?matricule=${encodeURIComponent(matricule.trim())}`
+      );
       const data = await res.json();
 
       if (res.ok && data.success) {
@@ -43,14 +67,16 @@ export default function ConsultationConge() {
       setLoading(false);
     }
   };
-useEffect(() => {
-  if (error) {
-    const timer = setTimeout(() => {
-      setError("");
-    }, 5000);
-    return () => clearTimeout(timer);
-  }
-}, [error]);
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError("");
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
+
   const handleCancel = () => {
     setMatricule("");
     setAgent(null);
@@ -91,12 +117,11 @@ useEffect(() => {
           </button>
         </div>
 
-{error && (
-  <div className={styles.fixedMessage} role="alert" aria-live="assertive">
-    {error}
-  </div>
-)}
-
+        {error && (
+          <div className={styles.fixedMessage} role="alert" aria-live="assertive">
+            {error}
+          </div>
+        )}
       </form>
 
       {agent && (

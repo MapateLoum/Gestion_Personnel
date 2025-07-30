@@ -1,25 +1,50 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./attestation.module.css";
-import { useEffect } from "react";
+
 export default function Attestation() {
   const router = useRouter();
+
+  // Protection accès : vérifier cookie isLoggedIn
+  useEffect(() => {
+    const isLoggedIn = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("isLoggedIn="))
+      ?.split("=")[1];
+
+    if (isLoggedIn !== "true") {
+      router.replace("/login");
+    }
+
+    // Empêcher retour arrière après déconnexion
+    window.onpopstate = () => {
+      const loggedIn = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("isLoggedIn="))
+        ?.split("=")[1];
+      if (loggedIn !== "true") {
+        router.replace("/login");
+      }
+    };
+  }, [router]);
 
   const [matricule, setMatricule] = useState("");
   const [attestationType, setAttestationType] = useState("travail");
   const [agent, setAgent] = useState(null);
   const [errorMsg, setErrorMsg] = useState("");
   const [loading, setLoading] = useState(false);
-useEffect(() => {
-  if (errorMsg) {
-    const timer = setTimeout(() => {
-      setErrorMsg("");
-    }, 5000);
-    return () => clearTimeout(timer);
-  }
-}, [errorMsg]);
+
+  useEffect(() => {
+    if (errorMsg) {
+      const timer = setTimeout(() => {
+        setErrorMsg("");
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [errorMsg]);
+
   const rechercherAgent = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -27,7 +52,9 @@ useEffect(() => {
     setAgent(null);
 
     try {
-      const res = await fetch(`/api/attestation/${encodeURIComponent(matricule.trim())}`);
+      const res = await fetch(
+        `/api/attestation/${encodeURIComponent(matricule.trim())}`
+      );
       const data = await res.json();
 
       if (res.ok && data.success) {
@@ -128,9 +155,15 @@ useEffect(() => {
         <body>
           ${generateHeader(today)}
           <h2>Attestation de travail</h2>
-          <p>Nous soussignés, <strong>INDUSTRIES CHIMIQUES DU SÉNÉGAL (Direction du site Minier)</strong>, attestons que Mr/Mme <strong>${agent.PRENOMS} ${agent.NOM}</strong>, titulaire du matricule <strong>${agent.MLE}</strong>, est employé(e) dans notre société depuis le <strong>${formatDate(agent.DATE_EMB)}</strong>.</p>
-          <p>Il/Elle occupe actuellement le poste de <strong>${agent.INTITULE_DU_POSE || agent.POSTE || "-"}</strong>.</p>
-          <p>Il/Elle est classé(e) à la catégorie <strong>${agent.CATEGORIE || "-"}</strong> de la Convention Collective des Industries Extractives et de la Prospection Minière.</p>
+          <p>Nous soussignés, <strong>INDUSTRIES CHIMIQUES DU SÉNÉGAL (Direction du site Minier)</strong>, attestons que Mr/Mme <strong>${agent.PRENOMS} ${agent.NOM}</strong>, titulaire du matricule <strong>${agent.MLE}</strong>, est employé(e) dans notre société depuis le <strong>${formatDate(
+      agent.DATE_EMB
+    )}</strong>.</p>
+          <p>Il/Elle occupe actuellement le poste de <strong>${
+            agent.INTITULE_DU_POSE || agent.POSTE || "-"
+          }</strong>.</p>
+          <p>Il/Elle est classé(e) à la catégorie <strong>${
+            agent.CATEGORIE || "-"
+          }</strong> de la Convention Collective des Industries Extractives et de la Prospection Minière.</p>
           <p>En foi de quoi, la présente attestation lui est délivrée pour servir et valoir ce que de droit.</p>
           <div class="responsable">Responsable R.H Mine</div>
           <div class="responsable-name">Alassane Lo</div>
@@ -148,63 +181,79 @@ useEffect(() => {
   };
 
   const imprimerAttestationRetraite = () => {
-    const today = new Date().toLocaleDateString("fr-FR");
+  const today = new Date().toLocaleDateString("fr-FR");
 
-    const content = `
-      <html>
-        <head>
-          <title>Attestation de retraite</title>
-          <style>
-           html, body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
+  const content = `
+    <html>
+      <head>
+        <title>Attestation de retraite</title>
+        <style>
+          body {
+            font-family: 'Segoe UI', sans-serif;
+            padding: 40px 60px;
+            color: #000;
+          }
+          header {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            margin-bottom: 30px;
+          }
+          .date-right {
+            text-align: right;
+            margin-bottom: 40px;
+            font-size: 14px;
+          }
+          h2 {
+            text-align: center;
+            font-size: 22px;
+            text-transform: uppercase;
+            margin-bottom: 30px;
+          }
+          p {
+            font-size: 16px;
+            line-height: 1.6;
+          }
+          .responsable {
+            margin-top: 60px;
+            text-align: right;
+            font-weight: 600;
+          }
+          .responsable-name {
+            margin-top: 40px;
+            text-align: right;
+            font-style: italic;
+          }
+          .footer {
+            border-top: 1px solid #ccc;
+            margin-top: 50px;
+            padding-top: 15px;
+            text-align: center;
+            font-size: 13px;
+            color: #555;
+          }
+        </style>
+      </head>
+      <body>
+        ${generateHeader(today)}
+        <h2>Attestation de retraite</h2>
+        <p>Nous soussignés, <strong>INDUSTRIES CHIMIQUES DU SÉNÉGAL</strong>, attestons que Mr/Mme <strong>${agent.PRENOMS} ${agent.NOM}</strong>, Mle <strong>${agent.MLE}</strong>, né(e) le <strong>${formatDate(agent.DATE_NAIS)}</strong>, est employé(e) dans notre société depuis le <strong>${formatDate(agent.DATE_EMB)}</strong>.</p>
+        <p>Son départ à la retraite est prévu le <strong>${formatDate(agent.DATE_DEP)}</strong>.</p>
+        <p>En foi de quoi, la présente attestation lui est délivrée pour servir et valoir ce que de droit.</p>
+        <div class="responsable">Responsable R.H Mine</div>
+        <div class="responsable-name">Alassane Lo</div>
+        ${generateFooter()}
+      </body>
+    </html>
+  `;
 
-body {
-  font-family: 'Segoe UI', sans-serif;
-  padding: 40px 60px;
-  color: #000;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-.content {
-  flex-grow: 1;
-}
-
-.footer {
-  border-top: 1px solid #ccc;
-  margin-top: 50px;
-  padding-top: 15px;
-  text-align: center;
-  font-size: 13px;
-  color: #555;
-}
-
-          </style>
-        </head>
-        <body>
-          ${generateHeader(today)}
-          <h2>Attestation de retraite</h2>
-          <p>Nous soussignés, <strong>INDUSTRIES CHIMIQUES DU SÉNÉGAL</strong>, attestons que Mr/Mme <strong>${agent.PRENOMS} ${agent.NOM}</strong>, Mle <strong>${agent.MLE}</strong>, né(e) le <strong>${formatDate(agent.DATE_NAIS)}</strong> est employé(e) dans notre société depuis le <strong>${formatDate(agent.DATE_EMB)}</strong>.</p>
-          <p>Son départ à la retraite est prévu le <strong>${formatDate(agent.DATE_DEP)}</strong>.</p>
-          <p>En foi de quoi, la présente attestation lui est délivrée pour servir et valoir ce que de droit.</p>
-          <div class="responsable">Le responsable RH Mine</div>
-          <div class="responsable-name">Alassane Lo</div>
-          ${generateFooter()}
-        </body>
-      </html>
-    `;
-
-    const printWindow = window.open("", "", "width=800,height=600");
-    printWindow.document.write(content);
-    printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
-    printWindow.close();
-  };
+  const printWindow = window.open("", "", "width=800,height=600");
+  printWindow.document.write(content);
+  printWindow.document.close();
+  printWindow.focus();
+  printWindow.print();
+  printWindow.close();
+};
 
   return (
     <div className={styles.container}>
@@ -244,26 +293,45 @@ body {
             Retour
           </button>
 
-{errorMsg && (
-  <div className={styles.popupMessage} role="alert" aria-live="assertive">
-    {errorMsg}
-  </div>
-)}
-
+          {errorMsg && (
+            <div
+              className={styles.popupMessage}
+              role="alert"
+              aria-live="assertive"
+            >
+              {errorMsg}
+            </div>
+          )}
         </form>
       )}
 
       {agent && (
         <div className={styles.attestationContent}>
           <h2>Informations de l’agent</h2>
-          <p><strong>Nom :</strong> {agent.NOM}</p>
-          <p><strong>Prénom :</strong> {agent.PRENOMS}</p>
-          <p><strong>Matricule :</strong> {agent.MLE}</p>
-          <p><strong>Poste :</strong> {agent.INTITULE_DU_POSE || agent.POSTE || "-"}</p>
-          <p><strong>Catégorie :</strong> {agent.CATEGORIE || "-"}</p>
-          <p><strong>Date d’embauche :</strong> {formatDate(agent.DATE_EMB)}</p>
-          <p><strong>Date de naissance :</strong> {formatDate(agent.DATE_NAIS)}</p>
-          <p><strong>Date prévue de départ :</strong> {formatDate(agent.DATE_DEP)}</p>
+          <p>
+            <strong>Nom :</strong> {agent.NOM}
+          </p>
+          <p>
+            <strong>Prénom :</strong> {agent.PRENOMS}
+          </p>
+          <p>
+            <strong>Matricule :</strong> {agent.MLE}
+          </p>
+          <p>
+            <strong>Poste :</strong> {agent.INTITULE_DU_POSE || agent.POSTE || "-"}
+          </p>
+          <p>
+            <strong>Catégorie :</strong> {agent.CATEGORIE || "-"}
+          </p>
+          <p>
+            <strong>Date d’embauche :</strong> {formatDate(agent.DATE_EMB)}
+          </p>
+          <p>
+            <strong>Date de naissance :</strong> {formatDate(agent.DATE_NAIS)}
+          </p>
+          <p>
+            <strong>Date prévue de départ :</strong> {formatDate(agent.DATE_DEP)}
+          </p>
 
           <div className={styles.buttons}>
             <button

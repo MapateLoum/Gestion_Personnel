@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "./edit.module.css";
 import { useRouter } from "next/navigation";
 
@@ -8,10 +8,32 @@ export default function EditCongeForm() {
   const [formData, setFormData] = useState({ matricule: "", refConge: "" });
   const [message, setMessage] = useState("");
   const [agentConge, setAgentConge] = useState(null);
-const router = useRouter();
-const handleRetour = () => {
-  router.back();
-};
+  const router = useRouter();
+
+  // Protection isLoggedIn
+  useEffect(() => {
+    const isLoggedIn = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("isLoggedIn="))
+      ?.split("=")[1];
+    if (isLoggedIn !== "true") {
+      router.replace("/login");
+    }
+
+    window.onpopstate = () => {
+      const loggedIn = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("isLoggedIn="))
+        ?.split("=")[1];
+      if (loggedIn !== "true") {
+        router.replace("/login");
+      }
+    };
+  }, [router]);
+
+  const handleRetour = () => {
+    router.back();
+  };
 
   const showMessage = (msg) => {
     setMessage(msg);
@@ -77,38 +99,39 @@ const handleRetour = () => {
   // Jours supplémentaires pour ancienneté (1 jour tous les 5 ans)
   const joursSupplAnciennete = (anciennete) => Math.floor(anciennete / 5);
 
-  // Formater date jj mois aaaa
+  // Formater date au format ISO (yyyy-mm-dd)
   const formatDateISO = (dateStr) => {
-  if (!dateStr) return "";
-  const d = new Date(dateStr);
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`;
-};
+    if (!dateStr) return "";
+    const d = new Date(dateStr);
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const dd = String(d.getDate()).padStart(2, "0");
+    return `${yyyy}-${mm}-${dd}`;
+  };
 
   // Imprimer bulletin
   const imprimerBulletin = () => {
-  if (!agentConge) return;
+    if (!agentConge) return;
 
-  const { agent, conge } = agentConge;
+    const { agent, conge } = agentConge;
 
-  const anciennete = calcAnciennete(agent.DATE_EMB);
-  const nbjAnciennete = joursSupplAnciennete(anciennete);
-  const medaille = parseInt(conge.NJMEDAILLE) || 0;
-  const reliquat = parseInt(conge.RELIQT) || 0;
-  const intercalaire = parseInt(conge.INTERC) || 0;
-  const suppFemme = parseInt(conge.SUPPF) || 0;
-  const nbjConges = diffJours(conge.DDEPART, conge.DDRETOUR);
+    const anciennete = calcAnciennete(agent.DATE_EMB);
+    const nbjAnciennete = joursSupplAnciennete(anciennete);
+    const medaille = parseInt(conge.NJMEDAILLE) || 0;
+    const reliquat = parseInt(conge.RELIQT) || 0;
+    const intercalaire = parseInt(conge.INTERC) || 0;
+    const suppFemme = parseInt(conge.SUPPF) || 0;
+    const nbjConges = diffJours(conge.DDEPART, conge.DDRETOUR);
 
-  const dureeTotale = nbjConges + nbjAnciennete + medaille + reliquat + intercalaire + suppFemme;
+    const dureeTotale =
+      nbjConges + nbjAnciennete + medaille + reliquat + intercalaire + suppFemme;
 
-  // Date reprise = date départ + durée totale - 1 jour
-  const dateDepart = new Date(conge.DDEPART);
-  const dateReprise = new Date(dateDepart);
-  dateReprise.setDate(dateReprise.getDate() + dureeTotale - 1);
+    // Date reprise = date départ + durée totale - 1 jour
+    const dateDepart = new Date(conge.DDEPART);
+    const dateReprise = new Date(dateDepart);
+    dateReprise.setDate(dateReprise.getDate() + dureeTotale - 1);
 
-  const html = `
+    const html = `
   <div style="font-family: Arial, sans-serif; margin: 30px; color: #000;">
     <header style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px;">
       <div style="font-weight: bold; font-size: 22px; text-transform: uppercase; color:#003366;">
@@ -123,7 +146,7 @@ const handleRetour = () => {
         DSMPH-MINE
       </div>
       <div style="font-weight: normal; color: #444;">
-        ${new Date().toLocaleDateString('fr-FR')}
+        ${new Date().toLocaleDateString("fr-FR")}
       </div>
     </header>
 
@@ -142,15 +165,29 @@ const handleRetour = () => {
       <div style="min-width: 45%;">Catégorie : <strong>${agent.CATEGORIE}</strong></div>
     </div>
     <div style="display: flex; gap: 30px; margin-bottom: 8px; flex-wrap: wrap;">
-      <div style="min-width: 45%;">Date d'embauche : <strong>${formatDateISO(agent.DATE_EMB)}</strong></div>
+      <div style="min-width: 45%;">Date d'embauche : <strong>${formatDateISO(
+        agent.DATE_EMB
+      )}</strong></div>
       <div style="min-width: 45%;">Ancienneté : <strong>${anciennete} ans</strong></div>
     </div>
 
     <!-- Bordure commence ici -->
-    <div style="border: 1px solid #444; padding: 15px; line-height: 1.5; margin-top: 20px; margin-bottom: 25px;">
+    <div
+      style="
+        border: 1px solid #444;
+        padding: 15px;
+        line-height: 1.5;
+        margin-top: 20px;
+        margin-bottom: 25px;
+      "
+    >
       <div>Matricule : <strong>${agent.MLE}</strong></div>
-      <div>Période de référence du <strong>${formatDateISO(conge.DDEPART)}</strong> au <strong>${formatDateISO(conge.DDRETOUR)}</strong>, soit <strong>${nbjConges} jours</strong> de congé ordinaire.</div>
-      <br/>
+      <div>
+        Période de référence du <strong>${formatDateISO(conge.DDEPART)}</strong> au
+        <strong>${formatDateISO(conge.DDRETOUR)}</strong>, soit
+        <strong>${nbjConges} jours</strong> de congé ordinaire.
+      </div>
+      <br />
       <div>
         <strong style="text-decoration: underline; font-weight: bold;">
           Congé supplémentaire rémunérés :
@@ -163,19 +200,21 @@ const handleRetour = () => {
         ${intercalaire} jour(s) pour congé intercalaire,
         ${suppFemme} jour(s) pour supplément femme salariée.
       </div>
-      <br/>
-      <div>
-        Durée totale du congé : <strong>${dureeTotale} jours</strong>
-      </div>
-      <br/>
+      <br />
+      <div>Durée totale du congé : <strong>${dureeTotale} jours</strong></div>
+      <br />
       <div style="display: flex; gap: 30px; flex-wrap: wrap;">
-        <div style="min-width: 45%;">Date de départ : <strong>${formatDateISO(conge.DDEPART)}</strong></div>
-        <div style="min-width: 45%;">Date de reprise prévue : <strong>${formatDateISO(dateReprise.toISOString())}</strong></div>
+        <div style="min-width: 45%;">Date de départ : <strong>${formatDateISO(
+          conge.DDEPART
+        )}</strong></div>
+        <div style="min-width: 45%;">
+          Date de reprise prévue : <strong>${formatDateISO(
+            dateReprise.toISOString()
+          )}</strong>
+        </div>
       </div>
-      <br/>
-      <div>
-        Observations : <em>${conge.OBSERVATIONS || "Aucune"}</em>
-      </div>
+      <br />
+      <div>Observations : <em>${conge.OBSERVATIONS || "Aucune"}</em></div>
     </div>
 
     <!-- Hors bordure -->
@@ -184,7 +223,11 @@ const handleRetour = () => {
     </div>
 
     <div style="font-size: 16px; line-height: 1.5;">
-      Nous soussignés INDUSTRIES CHIMIQUES DU SENEGAL, Direction du Site Minier (DSM) attestons que l'agent <strong>${agent.PRENOMS} ${agent.NOM}</strong> qui occupe le poste de <strong>${agent.INTITULE_DU_POSE}</strong> est bénéficiaire d'un congé annuel pour la période du <strong>${formatDateISO(conge.DDEPART)}</strong> au <strong>${formatDateISO(dateReprise.toISOString())}</strong>.
+      Nous soussignés INDUSTRIES CHIMIQUES DU SENEGAL, Direction du Site Minier (DSM) attestons que
+      l'agent <strong>${agent.PRENOMS} ${agent.NOM}</strong> qui occupe le poste de
+      <strong>${agent.INTITULE_DU_POSE}</strong> est bénéficiaire d'un congé annuel pour la période
+      du <strong>${formatDateISO(conge.DDEPART)}</strong> au
+      <strong>${formatDateISO(dateReprise.toISOString())}</strong>.
     </div>
 
     <div style="margin-top: 20px;">
@@ -196,24 +239,25 @@ const handleRetour = () => {
     </div>
 
     <div style="text-align: right; margin-top: 80px; font-weight: bold;">
-      Le responsable RH<br/><br/>
+      Le responsable RH
+      <br />
+      <br />
       Alassane Lo
     </div>
   </div>
-`;
+  `;
 
-
-  const printWindow = window.open("", "_blank", "width=900,height=700");
-  if (!printWindow) {
-    alert("Veuillez autoriser les popups pour imprimer.");
-    return;
-  }
-  printWindow.document.write(html);
-  printWindow.document.close();
-  printWindow.focus();
-  printWindow.print();
-  // printWindow.close();
-};
+    const printWindow = window.open("", "_blank", "width=900,height=700");
+    if (!printWindow) {
+      alert("Veuillez autoriser les popups pour imprimer.");
+      return;
+    }
+    printWindow.document.write(html);
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    // printWindow.close();
+  };
 
   return (
     <div className={styles.container}>
@@ -221,7 +265,9 @@ const handleRetour = () => {
 
       <form onSubmit={handleSubmit} className={styles.form}>
         <div className={styles.formGroup}>
-          <label htmlFor="matricule" className={styles.label}>Matricule</label>
+          <label htmlFor="matricule" className={styles.label}>
+            Matricule
+          </label>
           <input
             id="matricule"
             name="matricule"
@@ -234,7 +280,9 @@ const handleRetour = () => {
         </div>
 
         <div className={styles.formGroup}>
-          <label htmlFor="refConge" className={styles.label}>Référence congé</label>
+          <label htmlFor="refConge" className={styles.label}>
+            Référence congé
+          </label>
           <input
             id="refConge"
             name="refConge"
@@ -245,27 +293,24 @@ const handleRetour = () => {
             required
           />
         </div>
- <>
-        <button type="submit" className={styles.btnSubmit}>
-          Vérifier & afficher bulletin
-        </button>
-         <button onClick={handleRetour} className={styles.btnRetour}>
-      Retour
-    </button>
-  </>
+
+        <>
+          <button type="submit" className={styles.btnSubmit}>
+            Vérifier & afficher bulletin
+          </button>
+          <button onClick={handleRetour} className={styles.btnRetour} type="button">
+            Retour
+          </button>
+        </>
       </form>
 
       {message && <div className={styles.message}>{message}</div>}
 
       {agentConge && (
- 
-    <button onClick={imprimerBulletin} className={styles.btnPrint}>
-      Imprimer le bulletin de congé
-    </button>
-   
-)}
-
+        <button onClick={imprimerBulletin} className={styles.btnPrint}>
+          Imprimer le bulletin de congé
+        </button>
+      )}
     </div>
-    
   );
 }

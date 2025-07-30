@@ -3,20 +3,46 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./afficher_pers.module.css";
+
 export default function AfficherPersonnel() {
   const router = useRouter();
+
+  // Protection accès : vérifier cookie isLoggedIn
+  useEffect(() => {
+    const isLoggedIn = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("isLoggedIn="))
+      ?.split("=")[1];
+
+    if (isLoggedIn !== "true") {
+      router.replace("/login");
+    }
+
+    // Empêcher retour arrière après déconnexion
+    window.onpopstate = () => {
+      const loggedIn = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("isLoggedIn="))
+        ?.split("=")[1];
+      if (loggedIn !== "true") {
+        router.replace("/login");
+      }
+    };
+  }, [router]);
 
   const [personnels, setPersonnels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
   const [searchMatricule, setSearchMatricule] = useState("");
   const [filteredPersonnels, setFilteredPersonnels] = useState([]);
-useEffect(() => {
-  if (message) {
-    const timer = setTimeout(() => setMessage(""), 5000);
-    return () => clearTimeout(timer);
-  }
-}, [message]);
+
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => setMessage(""), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
+
   // Chargement initial de tout le personnel
   const fetchPersonnels = async () => {
     setLoading(true);
@@ -53,7 +79,9 @@ useEffect(() => {
     }
     setMessage("");
     const found = personnels.filter(
-      (p) => p.MLE.toString().toLowerCase() === searchMatricule.trim().toLowerCase()
+      (p) =>
+        p.MLE.toString().toLowerCase() ===
+        searchMatricule.trim().toLowerCase()
     );
     if (found.length === 0) {
       setMessage("❌ Aucun agent trouvé avec ce matricule.");
@@ -132,9 +160,7 @@ useEffect(() => {
       </div>
 
       {loading && <p>Chargement...</p>}
-      {message && (
-  <div className={styles.toast}>{message}</div>
-)}
+      {message && <div className={styles.toast}>{message}</div>}
 
       {!loading && filteredPersonnels.length > 0 && (
         <>
@@ -174,9 +200,21 @@ useEffect(() => {
                     <td>{p.INTITULE_DU_POSE || "-"}</td>
                     <td>{p.CATEGORIE || "-"}</td>
                     <td>{p.REG || "-"}</td>
-                    <td>{p.DATE_NAIS ? new Date(p.DATE_NAIS).toLocaleDateString() : "-"}</td>
-                    <td>{p.DATE_EMB ? new Date(p.DATE_EMB).toLocaleDateString() : "-"}</td>
-                    <td>{p.DATE_DEP ? new Date(p.DATE_DEP).toLocaleDateString() : "-"}</td>
+                    <td>
+                      {p.DATE_NAIS
+                        ? new Date(p.DATE_NAIS).toLocaleDateString()
+                        : "-"}
+                    </td>
+                    <td>
+                      {p.DATE_EMB
+                        ? new Date(p.DATE_EMB).toLocaleDateString()
+                        : "-"}
+                    </td>
+                    <td>
+                      {p.DATE_DEP
+                        ? new Date(p.DATE_DEP).toLocaleDateString()
+                        : "-"}
+                    </td>
                     <td>{p.SEXE || "-"}</td>
                     <td>{p.NBEP !== undefined ? p.NBEP : "-"}</td>
                     <td>{p.NBENF !== undefined ? p.NBENF : "-"}</td>

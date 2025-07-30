@@ -3,23 +3,31 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import styles from "./modif.module.css";
+import { useRouter } from "next/navigation";
 
 export default function ModificationConge() {
-  const [formData, setFormData] = useState({
-    REF: "",
-    matricule: "",
-    anciennete: "",
-    dateDepart: "",
-    dateRetour: "",
-    medaille: "",
-    reliquat: "",
-    intercalaire: "",
-    observations: "",
-    supplFemme: "",
-  });
+  const router = useRouter();
 
-  const [agentInfo, setAgentInfo] = useState(null);
-  const [message, setMessage] = useState("");
+  useEffect(() => {
+    const isLoggedIn = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("isLoggedIn="))
+      ?.split("=")[1];
+
+    if (isLoggedIn !== "true") {
+      router.replace("/login");
+    }
+
+    window.onpopstate = () => {
+      const loggedIn = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("isLoggedIn="))
+        ?.split("=")[1];
+      if (loggedIn !== "true") {
+        router.replace("/login");
+      }
+    };
+  }, [router]);
 
   function formatDateToYYYYMMDD(dateStr) {
     if (!dateStr) return "";
@@ -30,17 +38,32 @@ export default function ModificationConge() {
     const dd = String(d.getDate()).padStart(2, "0");
     return `${yyyy}-${mm}-${dd}`;
   }
-useEffect(() => {
-  if (message) {
-    const timer = setTimeout(() => {
-      setMessage("");
-    }, 5000); // disparaît après 5 secondes
 
-    return () => clearTimeout(timer); // nettoyage
-  }
-}, [message]);
+  const [formData, setFormData] = useState({
+    REF: "",
+    matricule: "",
+    anciennete: "",
+    dateDepart: "",
+    dateRetour: "",
+    medaille: 0,
+    reliquat: "",
+    intercalaire: 0,
+    observations: "",
+    supplFemme: 0,
+  });
 
-  // Charger congé + agent par REF
+  const [agentInfo, setAgentInfo] = useState(null);
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => {
+        setMessage("");
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
+
   useEffect(() => {
     async function fetchCongeParRef() {
       const refTrimmed = String(formData.REF || "").trim();
@@ -50,9 +73,7 @@ useEffect(() => {
         return;
       }
       try {
-        const res = await fetch(
-          `/api/modif_conge?ref=${encodeURIComponent(refTrimmed)}`
-        );
+        const res = await fetch(`/api/modif_conge?ref=${encodeURIComponent(refTrimmed)}`);
         const data = await res.json();
 
         if (res.ok && data.success && data.data) {
@@ -64,11 +85,11 @@ useEffect(() => {
             anciennete: conge.NJANC || "",
             dateDepart: formatDateToYYYYMMDD(conge.DDEPART),
             dateRetour: formatDateToYYYYMMDD(conge.DDRETOUR),
-            medaille: conge.NJMEDAILLE || "",
+            medaille: conge.NJMEDAILLE ?? 0,
             reliquat: conge.RELIQT || "",
-            intercalaire: conge.INTERC || "",
+            intercalaire: conge.INTERC ?? 0,
             observations: conge.OBSERVATIONS || "",
-            supplFemme: conge.SUPPF || "",
+            supplFemme: conge.SUPPF ?? 0,
           });
 
           if (pers) {
@@ -96,11 +117,9 @@ useEffect(() => {
         setAgentInfo(null);
       }
     }
-
     fetchCongeParRef();
   }, [formData.REF]);
 
-  // Charger congé + agent par matricule seulement si REF vide
   useEffect(() => {
     async function fetchCongeParMatricule() {
       const matriculeTrimmed = String(formData.matricule || "").trim();
@@ -109,9 +128,7 @@ useEffect(() => {
       if (!matriculeTrimmed || refTrimmed) return;
 
       try {
-        const res = await fetch(
-          `/api/modif_conge?matricule=${encodeURIComponent(matriculeTrimmed)}`
-        );
+        const res = await fetch(`/api/modif_conge?matricule=${encodeURIComponent(matriculeTrimmed)}`);
         const data = await res.json();
 
         if (res.ok && data.success && data.data) {
@@ -122,11 +139,11 @@ useEffect(() => {
             anciennete: conge.NJANC || "",
             dateDepart: formatDateToYYYYMMDD(conge.DDEPART),
             dateRetour: formatDateToYYYYMMDD(conge.DDRETOUR),
-            medaille: conge.NJMEDAILLE || "",
+            medaille: conge.NJMEDAILLE ?? 0,
             reliquat: conge.RELIQT || "",
-            intercalaire: conge.INTERC || "",
+            intercalaire: conge.INTERC ?? 0,
             observations: conge.OBSERVATIONS || "",
-            supplFemme: conge.SUPPF || "",
+            supplFemme: conge.SUPPF ?? 0,
           }));
 
           if (pers) {
@@ -154,25 +171,31 @@ useEffect(() => {
         setMessage("❌ Erreur réseau.");
       }
     }
-
     fetchCongeParMatricule();
   }, [formData.matricule, formData.REF]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
 
+    // Réinitialiser agentInfo si REF ou matricule change
     if (name === "REF") {
       setAgentInfo(null);
       setMessage("");
       setFormData((prev) => ({ ...prev, REF: value, matricule: "" }));
-    } else if (name === "matricule") {
+      return;
+    }
+    if (name === "matricule") {
       setAgentInfo(null);
       setMessage("");
       setFormData((prev) => ({ ...prev, matricule: value, REF: "" }));
-    } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
-      setMessage("");
+      return;
     }
+
+    // Pour les inputs number, on stocke la valeur telle quelle (string)
+    // Pour gérer les entiers librement, on ne convertit pas en int ici.
+    // Conversion éventuelle côté API ou base de données.
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setMessage("");
   };
 
   const handleSubmit = async (e) => {
@@ -230,6 +253,7 @@ useEffect(() => {
       </header>
 
       <form className={styles.form} onSubmit={handleSubmit}>
+
         <label htmlFor="REF">Référence congé :</label>
         <input
           type="text"
@@ -240,16 +264,6 @@ useEffect(() => {
           required
           placeholder="Ex: REF123"
         />
-
-        {/* <label htmlFor="matricule">Matricule :</label>
-        <input
-          type="text"
-          id="matricule"
-          name="matricule"
-          value={formData.matricule}
-          onChange={handleChange}
-          required
-        /> */}
 
         {agentInfo && (
           <div className={styles.agentInfo}>
@@ -269,10 +283,8 @@ useEffect(() => {
           type="number"
           id="anciennete"
           name="anciennete"
-          min="0"
           value={formData.anciennete}
           onChange={handleChange}
-          required
         />
 
         <label htmlFor="dateDepart">Date départ :</label>
@@ -300,7 +312,6 @@ useEffect(() => {
           type="number"
           id="medaille"
           name="medaille"
-          min="0"
           value={formData.medaille}
           onChange={handleChange}
         />
@@ -319,11 +330,18 @@ useEffect(() => {
           type="number"
           id="intercalaire"
           name="intercalaire"
-          min="0"
           value={formData.intercalaire}
           onChange={handleChange}
         />
 
+        <label htmlFor="supplFemme">Supplément femme :</label>
+        <input
+          type="number"
+          id="supplFemme"
+          name="supplFemme"
+          value={formData.supplFemme}
+          onChange={handleChange}
+        />
         <label htmlFor="observations">Observations :</label>
         <textarea
           id="observations"
@@ -333,15 +351,7 @@ useEffect(() => {
           rows={4}
         />
 
-        <label htmlFor="supplFemme">Supplément femme :</label>
-        <input
-          type="number"
-          id="supplFemme"
-          name="supplFemme"
-          min="0"
-          value={formData.supplFemme}
-          onChange={handleChange}
-        />
+        
 
         <div className={styles.buttons}>
           <button type="submit">Modifier</button>

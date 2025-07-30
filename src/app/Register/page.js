@@ -48,10 +48,16 @@ export default function Register() {
     }
 
     if (password !== confirm) {
-      setToastType('error');
-      setToastMsg('Les mots de passe ne correspondent pas.');
-      return;
-    }
+  setToastType('error');
+  setToastMsg('Les mots de passe ne correspondent pas.');
+  return;
+}
+
+if (password.length < 8) {
+  setToastType('error');
+  setToastMsg('Le mot de passe doit contenir au moins 8 caractères.');
+  return;
+}
 
     try {
       const res = await fetch('/api/register', {

@@ -3,8 +3,34 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import styles from "./saisi.module.css";
+import { useRouter } from "next/navigation";
 
 export default function SaisieConges() {
+  const router = useRouter();
+
+  // Protection accès : vérifier cookie isLoggedIn
+  useEffect(() => {
+    const isLoggedIn = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("isLoggedIn="))
+      ?.split("=")[1];
+
+    if (isLoggedIn !== "true") {
+      router.replace("/login");
+    }
+
+    // Empêcher retour arrière après déconnexion
+    window.onpopstate = () => {
+      const loggedIn = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("isLoggedIn="))
+        ?.split("=")[1];
+      if (loggedIn !== "true") {
+        router.replace("/login");
+      }
+    };
+  }, [router]);
+
   const [formData, setFormData] = useState({
     matricule: "",
     anciennete: "",
@@ -30,7 +56,9 @@ export default function SaisieConges() {
       }
 
       try {
-        const res = await fetch(`/api/personnel/infos/${encodeURIComponent(formData.matricule.trim())}`);
+        const res = await fetch(
+          `/api/personnel/infos/${encodeURIComponent(formData.matricule.trim())}`
+        );
         const data = await res.json();
 
         if (res.ok && data.found) {
@@ -41,8 +69,8 @@ export default function SaisieConges() {
             nom: agent.NOM,
             prenoms: agent.PRENOMS,
             poste: agent.INTITULE_DU_POSE,
-            categorie: agent.CATEGORIE,  // <-- ajouté ici
-            age: agent.age,              // <-- ajouté ici
+            categorie: agent.CATEGORIE,
+            age: agent.age,
             date_embauche: agent.DATE_EMB,
           });
 
@@ -79,15 +107,16 @@ export default function SaisieConges() {
     setFormData((prev) => ({ ...prev, [name]: value }));
     setMessage("");
   };
-useEffect(() => {
-  if (message) {
-    const timer = setTimeout(() => {
-      setMessage("");
-    }, 5000); // disparaît après 5 secondes
 
-    return () => clearTimeout(timer); // nettoyage
-  }
-}, [message]);
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => {
+        setMessage("");
+      }, 5000); // disparaît après 5 secondes
+
+      return () => clearTimeout(timer); // nettoyage
+    }
+  }, [message]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -186,7 +215,9 @@ useEffect(() => {
     <main className={styles.container}>
       <header className={styles.header}>
         <h1>Saisie des congés</h1>
-        <Link href="/Gestion_Conges" className={styles.backLink}>← Retour</Link>
+        <Link href="/Gestion_Conges" className={styles.backLink}>
+          ← Retour
+        </Link>
       </header>
 
       <form className={styles.form} onSubmit={handleSubmit}>
@@ -201,12 +232,24 @@ useEffect(() => {
 
         {agentInfo && (
           <div className={styles.agentInfo}>
-            <p><strong>Nom :</strong> {agentInfo.nom}</p>
-            <p><strong>Prénoms :</strong> {agentInfo.prenoms}</p>
-            <p><strong>Poste :</strong> {agentInfo.poste}</p>
-            <p><strong>Catégorie :</strong> {agentInfo.categorie}</p>
-            <p><strong>Âge :</strong> {agentInfo.age} ans</p>
-            <p><strong>Date embauche :</strong> {agentInfo.date_embauche}</p>
+            <p>
+              <strong>Nom :</strong> {agentInfo.nom}
+            </p>
+            <p>
+              <strong>Prénoms :</strong> {agentInfo.prenoms}
+            </p>
+            <p>
+              <strong>Poste :</strong> {agentInfo.poste}
+            </p>
+            <p>
+              <strong>Catégorie :</strong> {agentInfo.categorie}
+            </p>
+            <p>
+              <strong>Âge :</strong> {agentInfo.age} ans
+            </p>
+            <p>
+              <strong>Date embauche :</strong> {agentInfo.date_embauche}
+            </p>
           </div>
         )}
 
@@ -283,17 +326,26 @@ useEffect(() => {
 
         <div className={styles.buttons}>
           <button type="submit">Enregistrer</button>
-          <button type="button" onClick={imprimer} className={styles.printBtn}>
+          <button
+            type="button"
+            onClick={imprimer}
+            className={styles.printBtn}
+          >
             Imprimer
           </button>
         </div>
 
-       {message && (
-  <div className={`${styles.fixedMessage} ${message.includes("succès") ? styles.acceptMsg : styles.rejectMsg}`}>
-    {message}
-  </div>
-)}
-
+        {message && (
+          <div
+            className={`${styles.fixedMessage} ${
+              message.includes("succès")
+                ? styles.acceptMsg
+                : styles.rejectMsg
+            }`}
+          >
+            {message}
+          </div>
+        )}
       </form>
     </main>
   );

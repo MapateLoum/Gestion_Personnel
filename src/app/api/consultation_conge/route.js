@@ -23,7 +23,7 @@ export async function GET(request) {
 
     const connection = await mysql.createConnection(dbConfig);
 
-    // Requête pour infos de l'agent
+    // Infos agent
     const [persRows] = await connection.execute(
       `SELECT MLE, NOM, PRENOMS, INTITULE_DU_POSE AS poste, CATEGORIE, REG, DATE_NAIS, DATE_EMB, BASE_HORAIRE 
        FROM pers WHERE MLE = ?`,
@@ -40,7 +40,7 @@ export async function GET(request) {
 
     const agent = persRows[0];
 
-    // Requête pour les congés triés par REF décroissant
+    // Congés triés par REF croissant
     const [congesRows] = await connection.execute(
       `SELECT REF AS ref, DDEPART AS dateDepart, DDRETOUR AS dateRetour,
               NJMEDAILLE AS medaille, RELIQT AS reliquat, NJANC AS anciennete,
@@ -72,10 +72,10 @@ export async function GET(request) {
           dateReference: c.dateReference ? c.dateReference.toISOString().slice(0, 10) : null,
           anciennete: c.anciennete,
           reliquat: c.reliquat,
-          medaille: c.medaille === 1 ? "OUI" : "NON",
-          supplFemme: c.supplFemme === "O" || c.supplFemme === "o" ? "Oui" : "Non",
-          intercalaire: c.intercalaire === "O" || c.intercalaire === "o" ? "Oui" : "Non",
-          observation: c.observation
+          medaille: c.medaille,
+          supplFemme: c.supplFemme,
+          intercalaire: c.intercalaire,
+          observation: c.observation,
         })),
       },
     });

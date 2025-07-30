@@ -6,6 +6,28 @@ import styles from "./formulaire.module.css";
 
 export default function FormulairePersonnel() {
   const router = useRouter();
+   // 🔒 Protection par cookie et blocage retour
+  useEffect(() => {
+    const isLoggedIn = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("isLoggedIn="))
+      ?.split("=")[1];
+
+    if (isLoggedIn !== "true") {
+      router.replace("/login");
+    }
+
+    window.onpopstate = () => {
+      const stillLoggedIn = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("isLoggedIn="))
+        ?.split("=")[1];
+
+      if (stillLoggedIn !== "true") {
+        router.replace("/login");
+      }
+    };
+  }, [router]);
 
   const [formData, setFormData] = useState({
     mle: "",

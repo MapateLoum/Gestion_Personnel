@@ -7,6 +7,28 @@ import { useEffect } from "react";
 
 export default function ModifierPersonnel() {
   const router = useRouter();
+  useEffect(() => {
+    const isLoggedIn = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("isLoggedIn="))
+      ?.split("=")[1];
+
+    if (isLoggedIn !== "true") {
+      router.replace("/login");
+    }
+
+    window.onpopstate = () => {
+      const stillLoggedIn = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("isLoggedIn="))
+        ?.split("=")[1];
+
+      if (stillLoggedIn !== "true") {
+        router.replace("/login");
+      }
+    };
+  }, [router]);
+
 
   const [formData, setFormData] = useState({
     mle: "",

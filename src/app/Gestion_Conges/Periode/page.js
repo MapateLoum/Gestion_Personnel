@@ -1,11 +1,34 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "./periode.module.css"; // adapte ce fichier CSS selon ton besoin
 import { useRouter } from "next/navigation";
 
 export default function ListeDesCongesParPeriode() {
   const router = useRouter();
+
+  // Protection accès : vérifier cookie isLoggedIn
+  useEffect(() => {
+    const isLoggedIn = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("isLoggedIn="))
+      ?.split("=")[1];
+
+    if (isLoggedIn !== "true") {
+      router.replace("/login");
+    }
+
+    // Protection contre retour arrière après déconnexion
+    window.onpopstate = () => {
+      const loggedIn = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("isLoggedIn="))
+        ?.split("=")[1];
+      if (loggedIn !== "true") {
+        router.replace("/login");
+      }
+    };
+  }, [router]);
 
   const [refDebut, setRefDebut] = useState("");
   const [refFin, setRefFin] = useState("");
@@ -97,9 +120,9 @@ export default function ListeDesCongesParPeriode() {
 
     const rowsHtml = conges
       .map((c) => {
-        const nbj = parseInt(c.NJANC || 0);
-        const njsuppl = parseInt(c.SUPPF || 0);
-        const reliq = parseInt(c.RELIQT || 0);
+        const nbj = Number(c.NJANC) || 0;
+        const njsuppl = Number(c.SUPPF) || 0;
+        const reliq = Number(c.RELIQT) || 0;
         const njtotal = nbj + njsuppl + reliq;
         return `
           <tr>

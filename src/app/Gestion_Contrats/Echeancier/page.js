@@ -1,43 +1,68 @@
 "use client";
 
-import { useState } from 'react';
-import styles from './echeancier.module.css';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from "react";
+import styles from "./echeancier.module.css";
+import { useRouter } from "next/navigation";
 
 export default function EcheancierContrats() {
   const router = useRouter();
-  const [dateDebut, setDateDebut] = useState('');
-  const [dateFin, setDateFin] = useState('');
-  const [erreur, setErreur] = useState('');
+  const [dateDebut, setDateDebut] = useState("");
+  const [dateFin, setDateFin] = useState("");
+  const [erreur, setErreur] = useState("");
   const [resultats, setResultats] = useState([]);
+
+  // Vérification cookie isLoggedIn pour protection accès
+  useEffect(() => {
+    const isLoggedIn = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("isLoggedIn="))
+      ?.split("=")[1];
+
+    if (isLoggedIn !== "true") {
+      router.replace("/login");
+    }
+
+    // Empêcher retour arrière après déconnexion
+    window.onpopstate = () => {
+      const loggedIn = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("isLoggedIn="))
+        ?.split("=")[1];
+      if (loggedIn !== "true") {
+        router.replace("/login");
+      }
+    };
+  }, [router]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!dateDebut || !dateFin) {
-      setErreur('Veuillez renseigner les deux dates.');
+      setErreur("Veuillez renseigner les deux dates.");
       return;
     }
 
     if (new Date(dateDebut) > new Date(dateFin)) {
-      setErreur('La date de début doit être antérieure à la date de fin.');
+      setErreur("La date de début doit être antérieure à la date de fin.");
       return;
     }
 
-    setErreur('');
+    setErreur("");
 
     try {
-      const res = await fetch(`/api/echeancier?dateDebut=${dateDebut}&dateFin=${dateFin}`);
+      const res = await fetch(
+        `/api/echeancier?dateDebut=${dateDebut}&dateFin=${dateFin}`
+      );
       const data = await res.json();
 
       if (!res.ok || !data.success) {
-        setErreur(data.message || 'Erreur lors de la récupération.');
+        setErreur(data.message || "Erreur lors de la récupération.");
         return;
       }
 
       setResultats(data.contrats || []);
     } catch (err) {
-      setErreur('Erreur réseau ou serveur.');
+      setErreur("Erreur réseau ou serveur.");
     }
   };
 
@@ -92,11 +117,13 @@ export default function EcheancierContrats() {
           </thead>
           <tbody>
             {resultats.map((contrat, index) => {
-              const dateFin = new Date(contrat.date_fin);
-              const diffJours = Math.ceil((dateFin - new Date()) / (1000 * 60 * 60 * 24));
+              const dateFinContrat = new Date(contrat.date_fin);
+              const diffJours = Math.ceil(
+                (dateFinContrat - new Date()) / (1000 * 60 * 60 * 24)
+              );
               const isAlert = diffJours <= 15;
               return (
-                <tr key={index} className={isAlert ? styles.alertRow : ''}>
+                <tr key={index} className={isAlert ? styles.alertRow : ""}>
                   <td>{contrat.id}</td>
                   <td>{contrat.nom}</td>
                   <td>{contrat.prenom}</td>

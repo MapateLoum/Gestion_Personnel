@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import React, { useEffect } from "react";
+
 import styles from "./renouv.module.css";
 import { useRouter } from "next/navigation";
 
@@ -18,6 +20,28 @@ export default function RenouvContrat() {
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
 const router = useRouter();
+ // 🔒 Protection par cookie et blocage retour
+  useEffect(() => {
+    const isLoggedIn = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("isLoggedIn="))
+      ?.split("=")[1];
+
+    if (isLoggedIn !== "true") {
+      router.replace("/login");
+    }
+
+    window.onpopstate = () => {
+      const stillLoggedIn = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("isLoggedIn="))
+        ?.split("=")[1];
+
+      if (stillLoggedIn !== "true") {
+        router.replace("/login");
+      }
+    };
+  }, [router]);
   // Rechercher agent + contrat
   const handleRecherche = async (e) => {
     e.preventDefault();
