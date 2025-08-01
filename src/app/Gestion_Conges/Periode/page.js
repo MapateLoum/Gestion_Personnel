@@ -3,6 +3,22 @@
 import { useState, useEffect } from "react";
 import styles from "./periode.module.css"; // adapte ce fichier CSS selon ton besoin
 import { useRouter } from "next/navigation";
+import {
+  Document,
+  Paragraph,
+  Packer,
+  TextRun,
+  Table,
+  TableRow,
+  TableCell,
+  BorderStyle,
+  AlignmentType,
+  WidthType,
+  HeadingLevel,
+  TabStopType,
+} from "docx";
+
+import { saveAs } from "file-saver";
 
 export default function ListeDesCongesParPeriode() {
   const router = useRouter();
@@ -115,102 +131,181 @@ export default function ListeDesCongesParPeriode() {
     printWindow.document.close();
   };
 
-  const handleImpression = () => {
-    const today = new Date().toLocaleDateString("fr-FR");
+  const genererListeCongeWord = async (conges) => {
+  if (!conges || conges.length === 0) return;
 
-    const rowsHtml = conges
-      .map((c) => {
-        const nbj = Number(c.NJANC) || 0;
-        const njsuppl = Number(c.SUPPF) || 0;
-        const reliq = Number(c.RELIQT) || 0;
-        const njtotal = nbj + njsuppl + reliq;
-        return `
-          <tr>
-            <td>${c.REF}</td>
-            <td>${c.MLE}</td>
-            <td>${c.PRENOMS || ""}</td>
-            <td>${c.NOM || ""}</td>
-            <td>${nbj}</td>
-            <td>${njsuppl}</td>
-            <td>${reliq}</td>
-            <td>${njtotal}</td>
-            <td>${c.DDEPART?.slice(0, 10) || ""}</td>
-            <td>${c.DDRETOUR?.slice(0, 10) || ""}</td>
-          </tr>
-        `;
+  const today = new Date().toLocaleDateString("fr-FR");
+
+  // Construire les lignes du tableau
+  const rows = conges.map((c) => {
+    const nbj = Number(c.NJANC) || 0;
+    const njsuppl = Number(c.SUPPF) || 0;
+    const reliq = Number(c.RELIQT) || 0;
+    const njtotal = nbj + njsuppl + reliq;
+
+    return new TableRow({
+      children: [
+        new TableCell({ children: [new Paragraph(String(c.REF))], borders: { top: {style: BorderStyle.SINGLE, size: 1, color: "000000" }, bottom: {style: BorderStyle.SINGLE, size: 1, color: "000000" }, left: {style: BorderStyle.SINGLE, size: 1, color: "000000" }, right: {style: BorderStyle.SINGLE, size: 1, color: "000000" }} }),
+        new TableCell({ children: [new Paragraph(String(c.MLE))], borders: { /* idem */ } }),
+        new TableCell({ children: [new Paragraph(c.PRENOMS || "")], borders: { /* idem */ } }),
+        new TableCell({ children: [new Paragraph(c.NOM || "")], borders: { /* idem */ } }),
+        new TableCell({ children: [new Paragraph(String(nbj))], borders: { /* idem */ } }),
+        new TableCell({ children: [new Paragraph(String(njsuppl))], borders: { /* idem */ } }),
+        new TableCell({ children: [new Paragraph(String(reliq))], borders: { /* idem */ } }),
+        new TableCell({ children: [new Paragraph(String(njtotal))], borders: { /* idem */ } }),
+        new TableCell({ children: [new Paragraph(c.DDEPART?.slice(0, 10) || "")], borders: { /* idem */ } }),
+        new TableCell({ children: [new Paragraph(c.DDRETOUR?.slice(0, 10) || "")], borders: { /* idem */ } }),
+      ],
+    });
+  });
+
+  // En-tête tableau
+  const headerRow = new TableRow({
+    children: [
+      "Ref", "Mle", "Prénoms", "Nom", "NBJ", "NJSUPL", "Relqt", "NJTotal", "Départ", "Reprise"
+    ].map(text =>
+      new TableCell({
+        children: [new Paragraph({
+          text,
+          bold: true,
+          alignment: AlignmentType.CENTER,
+        })],
+        shading: { fill: "cccccc" },
+        borders: {
+  top: { style: BorderStyle.SINGLE, size: 2, color: "000000" },
+  bottom: { style: BorderStyle.SINGLE, size: 2, color: "000000" },
+  left: { style: BorderStyle.SINGLE, size: 2, color: "000000" },
+  right: { style: BorderStyle.SINGLE, size: 2, color: "000000" },
+}
+
       })
-      .join("");
+    ),
+  });
 
-    const contentHtml = `
-    <div style="font-family: Arial, sans-serif; margin-bottom: 30px;">
-      <header style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
-        <div style="font-weight: bold; font-size: 28px; color: #003366; text-transform: uppercase;">
-          INDORAMA
-        </div>
-        <div style="text-align: right;">
-          <div style="font-weight: bold; font-size: 20px; color: #006699;">ICS</div>
-          <div style="font-size: 14px; color: #333; margin-top: 4px;">
-            Date : ${today}
-          </div>
-        </div>
-      </header>
+  const table = new Table({
+    rows: [headerRow, ...rows],
+    width: {
+      size: 100,
+      type: WidthType.PERCENTAGE,
+    },
+  });
 
-      <div style="text-align: center; font-weight: bold; font-size: 24px; color: #cc0000; margin-bottom: 10px;">
-        NOTE INTERNE
-      </div>
+  const doc = new Document({
+    sections: [{
+      children: [
+        // En-tête flex simulé avec 2 Paragraphs alignés
+      new Paragraph({
+  children: [
+    new TextRun({ text: "INDORAMA", bold: true, color: "003366", size: 32 }),
+    new TextRun({
+      text: "\tICS",
+      bold: true,
+      color: "006699",
+      size: 32,
+    }),
+  ],
+  tabStops: [
+    {
+      type: TabStopType.RIGHT,
+      position: 9000, // position haute vers la droite (valeur en twips, 1 twip = 1/20 pt)
+    },
+  ],
+}),
 
-      <div style="text-align: right; font-size: 14px; font-weight: bold; color: #444; margin-bottom: 5px;">
-        DE : RH MINE
-      </div>
 
-      <div style="text-align: right; font-size: 14px; font-weight: bold; color: #444; margin-bottom: 20px;">
-        A : SCE PAIE
-      </div>
+// Paragraphe Date (taille plus petite, couleur gris foncé, aligné à droite)
+new Paragraph({
+  text: `Date : ${today}`,
+  size: 16,
+  color: "333333",
+  alignment: AlignmentType.RIGHT,
+  spacing: { after: 200 },
+}),
 
-      <div style="font-size: 14px; font-weight: normal; color: #444; margin-bottom: 30px;">
-        N/Réf : 25/RH MINE/AL/KTN/242
-      </div>
 
-      <div style="font-size: 14px; margin-bottom: 20px;">
-        <strong>Objet :</strong> Départs en congés
-      </div>
+        // Titre "NOTE INTERNE"
+        new Paragraph({
+          text: "NOTE INTERNE",
+          alignment: AlignmentType.CENTER,
+          bold: true,
+          color: "cc0000",
+          spacing: { after: 200 },
+          heading: HeadingLevel.HEADING_2,
+        }),
 
-      <div style="font-size: 14px; margin-bottom: 20px;">
-        Veuillez mettre en position de congés payés les agents dont les noms suivent :
-      </div>
+        // Ligne droite "DE : RH MINE"
+        new Paragraph({
+          text: "DE : RH MINE",
+          alignment: AlignmentType.RIGHT,
+          bold: true,
+          color: "444444",
+          spacing: { after: 100 },
+        }),
 
-      <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; border: 1px solid black;">
-        <thead>
-          <tr>
-            <th style="border: 1px solid black; padding: 5px;">Ref</th>
-            <th style="border: 1px solid black; padding: 5px;">Mle</th>
-            <th style="border: 1px solid black; padding: 5px;">Prénoms</th>
-            <th style="border: 1px solid black; padding: 5px;">Nom</th>
-            <th style="border: 1px solid black; padding: 5px;">NBJ</th>
-            <th style="border: 1px solid black; padding: 5px;">NJSUPL</th>
-            <th style="border: 1px solid black; padding: 5px;">Relqt</th>
-            <th style="border: 1px solid black; padding: 5px;">NJTotal</th>
-            <th style="border: 1px solid black; padding: 5px;">Départ</th>
-            <th style="border: 1px solid black; padding: 5px;">Reprise</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rowsHtml}
-        </tbody>
-      </table>
+        // Ligne droite "A : SCE PAIE"
+        new Paragraph({
+          text: "A : SCE PAIE",
+          alignment: AlignmentType.RIGHT,
+          bold: true,
+          color: "444444",
+          spacing: { after: 200 },
+        }),
 
-      <footer style="font-family: Arial, sans-serif; margin-top: 60px; display: flex; justify-content: flex-end; font-size: 12px; color: #444;">
-        <div style="text-align: right; min-width: 150px;">
-          Le Responsable RH
-          <div style="height: 30px;"></div> <!-- espace vertical -->
-          Alassane Lo
-        </div>
-      </footer>
-    </div>
-  `;
+        // N/Réf
+        new Paragraph({
+          text: "N/Réf : 25/RH MINE/AL/KTN/242",
+          spacing: { after: 200 },
+          color: "444444",
+          size: 20,
+        }),
 
-    openPrintWindow("Liste des Congés", contentHtml);
-  };
+        // Objet
+        new Paragraph({
+          children: [
+            new TextRun({ text: "Objet : ", bold: true, }),
+            new TextRun("Départs en congés"),
+          ],
+          spacing: { after: 200 },
+          size: 28,
+        }),
+
+        // Instruction
+        new Paragraph({
+          text: "Veuillez mettre en position de congés payés les agents dont les noms suivent :",
+          spacing: { after: 200 },
+          size: 20,
+        }),
+
+        // Table des congés
+        table,
+
+        // Pied de page avec signature à droite
+        new Paragraph({
+          text: "\n\n", // espace avant signature
+        }),
+        new Paragraph({
+          children: [
+            new TextRun({ text: "Le Responsable RH", bold: false }),
+          ],
+          alignment: AlignmentType.RIGHT,
+        }),
+        new Paragraph({
+          text: "\n\n", // espace
+        }),
+        new Paragraph({
+          children: [
+            new TextRun({ text: "Alassane Lo", bold: false }),
+          ],
+          alignment: AlignmentType.RIGHT,
+        }),
+      ],
+    }],
+  });
+
+  const blob = await Packer.toBlob(doc);
+  saveAs(blob, `liste_conges_${today.replace(/\//g, "-")}.docx`);
+};
+
 
   return (
     <div className={styles.container}>
@@ -239,10 +334,11 @@ export default function ListeDesCongesParPeriode() {
             Rechercher
           </button>
           {conges.length > 0 && (
-            <button onClick={handleImpression} className={styles.buttonRetour}>
-              Imprimer
-            </button>
-          )}
+  <button onClick={() => genererListeCongeWord(conges)} className={styles.buttonRetour}>
+    Télécharger en Word
+  </button>
+)}
+
         </div>
       </div>
 

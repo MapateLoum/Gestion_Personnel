@@ -218,10 +218,10 @@ export default function ModificationConge() {
 
     const depart = new Date(formData.dateDepart);
     const retour = new Date(formData.dateRetour);
-    if (retour < depart) {
-      setMessage("❌ La date de retour doit être postérieure à la date de départ.");
-      return;
-    }
+    // if (retour < depart) {
+    //   setMessage("❌ La date de retour doit être postérieure à la date de départ.");
+    //   return;
+    // }
 
     try {
       const res = await fetch("/api/modif_conge", {
@@ -256,8 +256,9 @@ export default function ModificationConge() {
 
         <label htmlFor="REF">Référence congé :</label>
         <input
-          type="text"
+          type="number"
           id="REF"
+          min="0"
           name="REF"
           value={formData.REF}
           onChange={handleChange}
@@ -283,10 +284,19 @@ export default function ModificationConge() {
           type="number"
           id="anciennete"
           name="anciennete"
+          min="0"
           value={formData.anciennete}
           onChange={handleChange}
         />
-
+<label htmlFor="dateRetour">Date dernier retour :</label>
+        <input
+          type="date"
+          id="dateRetour"
+          name="dateRetour"
+          value={formData.dateRetour}
+          onChange={handleChange}
+          required
+        />
         <label htmlFor="dateDepart">Date départ :</label>
         <input
           type="date"
@@ -297,21 +307,14 @@ export default function ModificationConge() {
           required
         />
 
-        <label htmlFor="dateRetour">Date retour :</label>
-        <input
-          type="date"
-          id="dateRetour"
-          name="dateRetour"
-          value={formData.dateRetour}
-          onChange={handleChange}
-          required
-        />
+    
 
         <label htmlFor="medaille">Médaille :</label>
         <input
           type="number"
           id="medaille"
           name="medaille"
+          min="0"
           value={formData.medaille}
           onChange={handleChange}
         />
@@ -321,6 +324,7 @@ export default function ModificationConge() {
           type="text"
           id="reliquat"
           name="reliquat"
+          min="0"
           value={formData.reliquat}
           onChange={handleChange}
         />
@@ -330,6 +334,7 @@ export default function ModificationConge() {
           type="number"
           id="intercalaire"
           name="intercalaire"
+          min="0"
           value={formData.intercalaire}
           onChange={handleChange}
         />
@@ -338,6 +343,7 @@ export default function ModificationConge() {
         <input
           type="number"
           id="supplFemme"
+          min="0"
           name="supplFemme"
           value={formData.supplFemme}
           onChange={handleChange}

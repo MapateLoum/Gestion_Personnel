@@ -85,12 +85,15 @@ export default function Attestation() {
   };
 
   const generateHeader = (today) => `
-    <header>
-      <div class="left-logo">INDORAMA</div>
-      <div class="right-logo">ICS</div>
-    </header>
-    <div class="date-right">Taiba, le ${today}</div>
-  `;
+  <header style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; border-bottom: 2px solid #ccc;">
+    <div class="left-logo" style="font-size: 24px; font-weight: bold; color: #444;">INDORAMA</div>
+    <div class="right-logo" style="font-size: 24px; font-weight: bold; color: #444;">ICS</div>
+  </header>
+  <div class="date-right" style="text-align: right; margin: 10px 20px 20px 0; font-size: 14px; color: #333;">
+    Taiba, le ${today}
+  </div>
+`;
+
 
   const generateFooter = () => `
     <footer class="footer">
@@ -140,6 +143,7 @@ export default function Attestation() {
             .responsable-name {
               margin-top: 40px;
               text-align: right;
+              margin-right: 30px;
               font-style: italic;
             }
             .footer {
@@ -155,7 +159,7 @@ export default function Attestation() {
         <body>
           ${generateHeader(today)}
           <h2>Attestation de travail</h2>
-          <p>Nous soussignés, <strong>INDUSTRIES CHIMIQUES DU SÉNÉGAL (Direction du site Minier)</strong>, attestons que Mr/Mme <strong>${agent.PRENOMS} ${agent.NOM}</strong>, titulaire du matricule <strong>${agent.MLE}</strong>, est employé(e) dans notre société depuis le <strong>${formatDate(
+          <p>Nous soussignés, <strong>INDUSTRIES CHIMIQUES DU SÉNÉGAL</strong>, attestons que Mr/Mme <strong>${agent.PRENOMS} ${agent.NOM}</strong>, titulaire du matricule <strong>${agent.MLE}</strong>, est employé(e) dans notre société depuis le <strong>${formatDate(
       agent.DATE_EMB
     )}</strong>.</p>
           <p>Il/Elle occupe actuellement le poste de <strong>${
@@ -165,8 +169,14 @@ export default function Attestation() {
             agent.CATEGORIE || "-"
           }</strong> de la Convention Collective des Industries Extractives et de la Prospection Minière.</p>
           <p>En foi de quoi, la présente attestation lui est délivrée pour servir et valoir ce que de droit.</p>
+          <br /><br />
           <div class="responsable">Responsable R.H Mine</div>
           <div class="responsable-name">Alassane Lo</div>
+          <br />
+          <br />
+          <br />
+          <br /><br /><br /><br />
+          <br /><br /><br /><br /><br />
           ${generateFooter()}
         </body>
       </html>

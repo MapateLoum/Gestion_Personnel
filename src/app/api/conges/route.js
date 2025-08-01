@@ -22,18 +22,20 @@ export async function POST(request) {
       intercalaire,
       supplFemme,
       observations,
+      dateRetourPrevue, // 🔹 ajouté ici
     } = body;
 
-    // Vérification des champs obligatoires
+    // ✅ Vérifie aussi dateRetourPrevue
     if (
       !matricule ||
-      anciennete == null ||
+      anciennete === "" || anciennete == null ||
       !dateDepart ||
-      !dateRetour ||
-      medaille == null ||
-      reliquat == null ||
-      intercalaire == null ||
-      supplFemme == null ||
+      dateRetour === "" || dateRetour == null ||
+      dateRetourPrevue === "" || dateRetourPrevue == null || // 🔹 ajouté
+      medaille === "" || medaille == null ||
+      reliquat === "" || reliquat == null ||
+      intercalaire === "" || intercalaire == null ||
+      supplFemme === "" || supplFemme == null ||
       !observations
     ) {
       return NextResponse.json(
@@ -42,9 +44,17 @@ export async function POST(request) {
       );
     }
 
+    function formatDate(dateStr) {
+      const d = new Date(dateStr);
+      return d.toISOString().split("T")[0];
+    }
+
+    const dateDepartFormatted = formatDate(dateDepart);
+    const dateRetourFormatted = formatDate(dateRetour);
+    const dateRetourPrevueFormatted = formatDate(dateRetourPrevue); // 🔹 ajouté
+
     const connection = await mysql.createConnection(dbConfig);
 
-    // Vérifier si le congé chevauche un congé existant pour le même matricule
     const checkOverlapSql = `
       SELECT COUNT(*) AS overlapCount
       FROM conges
@@ -54,8 +64,8 @@ export async function POST(request) {
 
     const [rows] = await connection.execute(checkOverlapSql, [
       matricule,
-      dateRetour, // nouveau départ doit être après l'ancien retour pour pas chevaucher
-      dateDepart, // nouvelle fin doit être avant l'ancien départ pour pas chevaucher
+      dateRetourFormatted,
+      dateDepartFormatted,
     ]);
 
     if (rows[0].overlapCount > 0) {
@@ -69,22 +79,22 @@ export async function POST(request) {
       );
     }
 
-    // Insérer le nouveau congé (REF est auto-incrémenté côté base)
     const sql = `
       INSERT INTO conges
-      (MLE, NJANC, DDEPART, DDRETOUR, NJMEDAILLE, RELIQT, INTERC, SUPPF, OBSERVATIONS)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      (MLE, NJANC, DDEPART, DDRETOUR, DTA_RET_EFF, NJMEDAILLE, RELIQT, INTERC, SUPPF, OBSERVATIONS)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const values = [
       matricule,
-      anciennete,
-      dateDepart,
-      dateRetour,
-      medaille,
-      reliquat,
-      intercalaire,
-      supplFemme,
+      Number(anciennete),
+      dateDepartFormatted,
+      dateRetourFormatted,
+      dateRetourPrevueFormatted, // 🔹 ajouté ici
+      Number(medaille),
+      Number(reliquat),
+      Number(intercalaire),
+      Number(supplFemme),
       observations,
     ];
 

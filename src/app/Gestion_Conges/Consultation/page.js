@@ -134,7 +134,6 @@ export default function ConsultationConge() {
           <p><strong>Région :</strong> {agent.reg}</p>
           <p><strong>Date de naissance :</strong> {agent.dateNaissance}</p>
           <p><strong>Date d'embauche :</strong> {agent.dateEmbauche}</p>
-          <p><strong>Base horaire :</strong> {agent.baseHoraire}</p>
 
           <h3>Historique des congés</h3>
           <div className={styles.tableContainer}>
@@ -143,7 +142,7 @@ export default function ConsultationConge() {
                 <tr>
                   <th>Réf.</th>
                   <th>Date départ</th>
-                  <th>Date retour</th>
+                  <th>Date dernier retour</th>
                   <th>Médaille</th>
                   <th>Reliquat</th>
                   <th>Ancienneté</th>
