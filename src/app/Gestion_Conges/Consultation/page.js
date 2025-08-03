@@ -142,7 +142,7 @@ export default function ConsultationConge() {
                 <tr>
                   <th>Réf.</th>
                   <th>Date départ</th>
-                  <th>Date dernier retour</th>
+                  <th>Date retour</th>
                   <th>Médaille</th>
                   <th>Reliquat</th>
                   <th>Ancienneté</th>

@@ -1,4 +1,4 @@
-import mysql from "mysql2/promise";
+import { getConnection } from "../../../../lib/db"; // chemin relatif correct
 
 function calculJoursCongesOrdinaires(dernierRetourStr, dateDepartStr) {
   if (!dernierRetourStr) return 0;
@@ -26,6 +26,7 @@ function calculJoursCongesOrdinaires(dernierRetourStr, dateDepartStr) {
 }
 
 export async function POST(req) {
+  let db;
   try {
     const { matricule, refConge } = await req.json();
 
@@ -36,12 +37,7 @@ export async function POST(req) {
       );
     }
 
-    const db = await mysql.createConnection({
-      host: "localhost",
-      user: "root",
-      password: "Passer*2003*",
-      database: "stage",
-    });
+    db = await getConnection();
 
     // Récupérer infos agent
     const [agents] = await db.execute(
@@ -50,7 +46,6 @@ export async function POST(req) {
     );
 
     if (agents.length === 0) {
-      await db.end();
       return new Response(JSON.stringify({ error: "Agent non existant" }), { status: 404 });
     }
     const agent = agents[0];
@@ -63,7 +58,6 @@ export async function POST(req) {
     );
 
     if (conges.length === 0) {
-      await db.end();
       return new Response(
         JSON.stringify({ error: "Référence de congé invalide pour cet agent" }),
         { status: 404 }
@@ -88,8 +82,6 @@ export async function POST(req) {
     // Calcul jours congé ordinaire
     const joursAcquis = calculJoursCongesOrdinaires(dernierRetour, conge.DDEPART);
 
-    await db.end();
-
     return new Response(
       JSON.stringify({
         agent,
@@ -105,5 +97,7 @@ export async function POST(req) {
   } catch (error) {
     console.error("Erreur API /conges/verif :", error);
     return new Response(JSON.stringify({ error: "Erreur serveur." }), { status: 500 });
+  } finally {
+    if (db) await db.end();
   }
 }

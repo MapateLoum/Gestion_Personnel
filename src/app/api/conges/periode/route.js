@@ -1,4 +1,4 @@
-import mysql from "mysql2/promise";
+import { getConnection } from "../../../../lib/db"; // chemin relatif correct
 
 export async function POST(req) {
   try {
@@ -10,12 +10,7 @@ export async function POST(req) {
       });
     }
 
-    const db = await mysql.createConnection({
-      host: "localhost",
-      user: "root",
-      password: "Passer*2003*", // ou ton vrai mot de passe
-      database: "stage",
-    });
+    const db = await getConnection();
 
     const [rows] = await db.execute(
       `
@@ -44,11 +39,8 @@ export async function POST(req) {
 
     return new Response(JSON.stringify({ conges: rows }), {
       status: 200,
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
     });
-
   } catch (error) {
     console.error("Erreur API /conges/periode :", error);
     return new Response(JSON.stringify({ error: "Erreur serveur." }), {

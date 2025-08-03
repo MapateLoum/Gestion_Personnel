@@ -1,12 +1,5 @@
 import { NextResponse } from "next/server";
-import mysql from "mysql2/promise";
-
-const dbConfig = {
-  host: "localhost",
-  user: "root",
-  password: "Passer*2003*",
-  database: "stage",
-};
+import { getConnection } from "../../../lib/db";  // ajuste le chemin relatif selon ta structure
 
 // GET : récupère conge + agent selon REF OU matricule (REF prioritaire)
 export async function GET(request) {
@@ -22,7 +15,7 @@ export async function GET(request) {
   }
 
   try {
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await getConnection();
 
     let congeRows = [];
     if (ref) {
@@ -91,7 +84,7 @@ export async function PUT(request) {
       );
     }
 
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await getConnection();
 
     const sql = `
       UPDATE conges
@@ -141,4 +134,3 @@ export async function PUT(request) {
     );
   }
 }
-

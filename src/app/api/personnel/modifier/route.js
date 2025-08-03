@@ -1,5 +1,5 @@
-import mysql from "mysql2/promise";
 import { NextResponse } from "next/server";
+import { getConnection } from "../../../../lib/db";  // ajuste le chemin relatif selon ta structure
 
 function toNullIfUndefined(value) {
   return value === undefined ? null : value;
@@ -14,12 +14,7 @@ export async function GET(request) {
       return NextResponse.json({ success: false, error: "Matricule requis" }, { status: 400 });
     }
 
-    const connection = await mysql.createConnection({
-      host: "localhost",
-      user: "root",
-      password: "Passer*2003*",
-      database: "stage",
-    });
+    const connection = await getConnection();
 
     const [rows] = await connection.execute("SELECT * FROM pers WHERE MLE = ?", [mle.toUpperCase()]);
     await connection.end();
@@ -42,12 +37,7 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: "Matricule requis pour mise à jour" }, { status: 400 });
     }
 
-    const connection = await mysql.createConnection({
-      host: "localhost",
-      user: "root",
-      password: "Passer*2003*",
-      database: "stage",
-    });
+    const connection = await getConnection();
 
     const sql = `
       UPDATE pers SET

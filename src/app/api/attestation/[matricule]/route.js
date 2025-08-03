@@ -1,22 +1,17 @@
 // /src/app/api/attestation/[matricule]/route.js
 
-import mysql from "mysql2/promise";
 import { NextResponse } from "next/server";
+import { getConnection } from "../../../../lib/db"; // chemin relatif correct
 
 export async function GET(request, context) {
-  const { matricule } = context.params; // ✅ Bonne façon de récupérer le paramètre dynamique
+const { matricule } = await context.params;
 
   try {
-    const connection = await mysql.createConnection({
-      host: "localhost",
-      user: "root",
-      password: "Passer*2003*",
-      database: "stage",
-    });
+    const connection = await getConnection();
 
     const [rows] = await connection.execute(
       `SELECT * FROM pers WHERE MLE = ? LIMIT 1`,
-      [matricule.toUpperCase()] // facultatif : standardiser en majuscules
+      [matricule.toUpperCase()] // standardisation facultative
     );
 
     await connection.end();
@@ -30,6 +25,7 @@ export async function GET(request, context) {
 
     return NextResponse.json({ success: true, agent: rows[0] });
   } catch (error) {
+    console.error("Erreur attestation API :", error);
     return NextResponse.json(
       { success: false, error: error.message },
       { status: 500 }

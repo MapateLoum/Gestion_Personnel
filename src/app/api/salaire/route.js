@@ -1,13 +1,5 @@
-// src/app/api/salaire/route.js
-import mysql from "mysql2/promise";
 import { NextResponse } from "next/server";
-
-const dbConfig = {
-  host: "localhost",
-  user: "root",
-  password: "Passer*2003*",
-  database: "stage",
-};
+import { getConnection } from "../../../lib/db";  // ajuste le chemin relatif selon ta structure
 
 export async function GET(request) {
   let connection;
@@ -23,7 +15,7 @@ export async function GET(request) {
       );
     }
 
-    connection = await mysql.createConnection(dbConfig);
+    connection = await getConnection();
 
     // ✅ 1) Infos agent
     const [persRows] = await connection.execute(
@@ -33,6 +25,7 @@ export async function GET(request) {
     );
 
     if (persRows.length === 0) {
+      await connection.end();
       return NextResponse.json(
         { success: false, message: "Agent non trouvé" },
         { status: 404 }
@@ -78,6 +71,8 @@ export async function GET(request) {
       avantage = salRows[0].AVALOIR;
     }
 
+    await connection.end();
+
     return NextResponse.json({
       success: true,
       matricule: agent.MLE,
@@ -100,11 +95,10 @@ export async function GET(request) {
     });
   } catch (error) {
     console.error("Erreur API salaire:", error);
+    if (connection) await connection.end();
     return NextResponse.json(
       { success: false, message: "Erreur serveur." },
       { status: 500 }
     );
-  } finally {
-    if (connection) await connection.end();
   }
 }

@@ -1,12 +1,7 @@
-import mysql from "mysql2/promise";
 import { NextResponse } from "next/server";
+import { getConnection } from "../../../../../lib/db"; // chemin relatif correct
 
-const dbConfig = {
-  host: "localhost",
-  user: "root",
-  password: "Passer*2003*",
-  database: "stage",
-};
+
 
 function formatDate(dateStr) {
   const date = new Date(dateStr);
@@ -27,7 +22,7 @@ export async function GET(request, context) {
       );
     }
 
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await getConnection();
 
     // 1) Chercher la date DDRETOUR la plus récente dans conges pour ce MLE
     const [rows] = await connection.execute(

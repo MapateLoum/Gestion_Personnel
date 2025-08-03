@@ -1,29 +1,22 @@
-import mysql from 'mysql2/promise';
-import { NextResponse } from 'next/server';
-
-const dbConfig = {
-  host: 'localhost',
-  user: 'root',
-  password: 'Passer*2003*',
-  database: 'stage',
-};
+import { getConnection } from "../../../lib/db";  // ajuste le chemin relatif selon ta structure
+import { NextResponse } from "next/server";
 
 export async function GET(request) {
   let connection;
 
   try {
     const { searchParams } = new URL(request.url);
-    const dateDebut = searchParams.get('dateDebut');
-    const dateFin = searchParams.get('dateFin');
+    const dateDebut = searchParams.get("dateDebut");
+    const dateFin = searchParams.get("dateFin");
 
     if (!dateDebut || !dateFin) {
       return NextResponse.json(
-        { success: false, message: 'Les dates sont requises.' },
+        { success: false, message: "Les dates sont requises." },
         { status: 400 }
       );
     }
 
-    connection = await mysql.createConnection(dbConfig);
+    connection = await getConnection(); // 👈 Connexion via lib/db.js
 
     const [rows] = await connection.execute(
       `
@@ -43,9 +36,9 @@ export async function GET(request) {
 
     return NextResponse.json({ success: true, contrats: rows });
   } catch (error) {
-    console.error('Erreur API échéancier:', error);
+    console.error("Erreur API échéancier:", error);
     return NextResponse.json(
-      { success: false, message: 'Erreur serveur.' },
+      { success: false, message: "Erreur serveur." },
       { status: 500 }
     );
   } finally {

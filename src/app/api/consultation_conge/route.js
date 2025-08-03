@@ -1,13 +1,5 @@
-// src/app/api/consultation_conge/route.js
-import mysql from "mysql2/promise";
 import { NextResponse } from "next/server";
-
-const dbConfig = {
-  host: "localhost",
-  user: "root",
-  password: "Passer*2003*",
-  database: "stage",
-};
+import { getConnection } from "../../../lib/db";  // ajuste le chemin relatif selon ta structure
 
 export async function GET(request) {
   try {
@@ -21,7 +13,7 @@ export async function GET(request) {
       );
     }
 
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await getConnection();
 
     // Infos agent
     const [persRows] = await connection.execute(

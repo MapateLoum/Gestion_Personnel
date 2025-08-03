@@ -1,16 +1,11 @@
 import { NextResponse } from "next/server";
-import mysql from "mysql2/promise";
+import { getConnection } from "../../../lib/db";  // ajuste le chemin relatif selon ta structure
 
 export async function POST(request) {
   try {
     const data = await request.json();
 
-    const connection = await mysql.createConnection({
-      host: "localhost",
-      user: "root",
-      password: "Passer*2003*",
-      database: "stage",
-    });
+    const connection = await getConnection();
 
     const sql = `
       INSERT INTO pers (

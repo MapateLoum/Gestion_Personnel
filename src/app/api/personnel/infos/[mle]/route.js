@@ -1,5 +1,5 @@
-import mysql from "mysql2/promise";
 import { NextResponse } from "next/server";
+import { getConnection } from "../../../../../lib/db";  // ajuste le chemin relatif selon ta structure
 
 // Formate une date JS au format AAAA-MM-JJ
 function formatDate(dateStr) {
@@ -22,15 +22,7 @@ function calculateAge(birthDateStr) {
   return age >= 0 ? age : 0;
 }
 
-const dbConfig = {
-  host: "localhost",
-  user: "root",
-  password: "Passer*2003*",
-  database: "stage",
-};
-
 export async function GET(request, context) {
-  // ⚠️ await ici pour récupérer params
   const params = await context.params;
   const mle = params.mle;
 
@@ -42,7 +34,7 @@ export async function GET(request, context) {
   }
 
   try {
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await getConnection();
 
     const [rows] = await connection.execute(
       "SELECT MLE, NOM, PRENOMS, INTITULE_DU_POSE, CATEGORIE, DATE_EMB, DATE_NAIS FROM pers WHERE MLE = ? LIMIT 1",

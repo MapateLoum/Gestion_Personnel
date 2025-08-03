@@ -1,12 +1,5 @@
 import { NextResponse } from "next/server";
-import mysql from "mysql2/promise";
-
-const dbConfig = {
-  host: "localhost",
-  user: "root",
-  password: "Passer*2003*",
-  database: "stage",
-};
+import { getConnection } from "../../../lib/db";  // ajuste le chemin selon ta structure
 
 export async function POST(request) {
   try {
@@ -22,16 +15,15 @@ export async function POST(request) {
       intercalaire,
       supplFemme,
       observations,
-      dateRetourPrevue, // 🔹 ajouté ici
+      dateRetourPrevue,
     } = body;
 
-    // ✅ Vérifie aussi dateRetourPrevue
     if (
       !matricule ||
       anciennete === "" || anciennete == null ||
       !dateDepart ||
       dateRetour === "" || dateRetour == null ||
-      dateRetourPrevue === "" || dateRetourPrevue == null || // 🔹 ajouté
+      dateRetourPrevue === "" || dateRetourPrevue == null ||
       medaille === "" || medaille == null ||
       reliquat === "" || reliquat == null ||
       intercalaire === "" || intercalaire == null ||
@@ -51,9 +43,9 @@ export async function POST(request) {
 
     const dateDepartFormatted = formatDate(dateDepart);
     const dateRetourFormatted = formatDate(dateRetour);
-    const dateRetourPrevueFormatted = formatDate(dateRetourPrevue); // 🔹 ajouté
+    const dateRetourPrevueFormatted = formatDate(dateRetourPrevue);
 
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await getConnection();
 
     const checkOverlapSql = `
       SELECT COUNT(*) AS overlapCount
@@ -90,7 +82,7 @@ export async function POST(request) {
       Number(anciennete),
       dateDepartFormatted,
       dateRetourFormatted,
-      dateRetourPrevueFormatted, // 🔹 ajouté ici
+      dateRetourPrevueFormatted,
       Number(medaille),
       Number(reliquat),
       Number(intercalaire),

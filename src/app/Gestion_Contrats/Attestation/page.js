@@ -159,7 +159,7 @@ export default function Attestation() {
         <body>
           ${generateHeader(today)}
           <h2>Attestation de travail</h2>
-          <p>Nous soussignés, <strong>INDUSTRIES CHIMIQUES DU SÉNÉGAL</strong>, attestons que Mr/Mme <strong>${agent.PRENOMS} ${agent.NOM}</strong>, titulaire du matricule <strong>${agent.MLE}</strong>, est employé(e) dans notre société depuis le <strong>${formatDate(
+          <p>Nous soussignés, <strong>INDUSTRIES CHIMIQUES DU SÉNÉGAL</strong>, attestons que Mr/Mme <strong>${agent.PRENOMS} ${agent.NOM}</strong>, Mle <strong>${agent.MLE}</strong>, est employé(e) dans notre société depuis le <strong>${formatDate(
       agent.DATE_EMB
     )}</strong>.</p>
           <p>Il/Elle occupe actuellement le poste de <strong>${
@@ -175,7 +175,7 @@ export default function Attestation() {
           <br />
           <br />
           <br />
-          <br /><br /><br /><br />
+          <br />
           <br /><br /><br /><br /><br />
           ${generateFooter()}
         </body>
@@ -225,15 +225,16 @@ export default function Attestation() {
             line-height: 1.6;
           }
           .responsable {
-            margin-top: 60px;
-            text-align: right;
-            font-weight: 600;
-          }
-          .responsable-name {
-            margin-top: 40px;
-            text-align: right;
-            font-style: italic;
-          }
+              margin-top: 60px;
+              text-align: right;
+              font-weight: 600;
+            }
+            .responsable-name {
+              margin-top: 40px;
+              text-align: right;
+              margin-right: 30px;
+              font-style: italic;
+            }
           .footer {
             border-top: 1px solid #ccc;
             margin-top: 50px;
@@ -250,9 +251,15 @@ export default function Attestation() {
         <p>Nous soussignés, <strong>INDUSTRIES CHIMIQUES DU SÉNÉGAL</strong>, attestons que Mr/Mme <strong>${agent.PRENOMS} ${agent.NOM}</strong>, Mle <strong>${agent.MLE}</strong>, né(e) le <strong>${formatDate(agent.DATE_NAIS)}</strong>, est employé(e) dans notre société depuis le <strong>${formatDate(agent.DATE_EMB)}</strong>.</p>
         <p>Son départ à la retraite est prévu le <strong>${formatDate(agent.DATE_DEP)}</strong>.</p>
         <p>En foi de quoi, la présente attestation lui est délivrée pour servir et valoir ce que de droit.</p>
+      <br /> <br />
         <div class="responsable">Responsable R.H Mine</div>
-        <div class="responsable-name">Alassane Lo</div>
-        ${generateFooter()}
+          <div class="responsable-name">Alassane Lo</div>
+          <br />
+          <br />
+          <br />
+          <br /> <br /> <br /> <br /> <br />
+          <br /><br /><br /><br /><br />
+           ${generateFooter()}
       </body>
     </html>
   `;

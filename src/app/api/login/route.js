@@ -1,13 +1,5 @@
-import mysql from 'mysql2/promise';
+import { getConnection } from "../../../lib/db";  // ajuste le chemin relatif selon ta structure
 import { NextResponse } from 'next/server';
-
-// Configuration connexion MySQL
-const dbConfig = {
-  host: 'localhost',
-  user: 'root',
-  password: 'Passer*2003*',
-  database: 'stage',
-};
 
 export async function POST(request) {
   try {
@@ -17,9 +9,8 @@ export async function POST(request) {
       return NextResponse.json({ success: false, message: 'Champs manquants' }, { status: 400 });
     }
 
-    const connection = await mysql.createConnection(dbConfig);
+    const connection = await getConnection();
 
-    // Recherche utilisateur avec matricule
     const [rows] = await connection.execute(
       'SELECT * FROM users WHERE matricule = ?',
       [matricule]
@@ -33,7 +24,7 @@ export async function POST(request) {
 
     const user = rows[0];
 
-    // Vérifier mot de passe (ici simple égalité, mais tu devrais utiliser un hash en prod)
+    // Comparaison simple (utiliser bcrypt en production)
     if (user.password_hash !== password) {
       return NextResponse.json({ success: false, message: 'Mot de passe incorrect' }, { status: 401 });
     }
