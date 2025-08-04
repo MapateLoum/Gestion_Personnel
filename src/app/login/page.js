@@ -93,7 +93,7 @@ export default function Login() {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
-
+<p className={styles.switchText}><Link href="/Renitialisation" className={styles.switchLink}>Mot de passe oublié</Link></p>
           <button type="submit" className={styles.button}>Se connecter</button>
         </form>
 
