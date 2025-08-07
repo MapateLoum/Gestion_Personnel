@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getConnection } from "../../../lib/db";  // ajuste le chemin relatif selon ta structure
+import bcrypt from "bcrypt";
 
+const saltRounds = 10;
 export async function POST(request) {
   try {
     const { matricule, email, nom, prenom, password } = await request.json();
@@ -8,6 +10,8 @@ export async function POST(request) {
     if (!matricule || !email || !nom || !prenom || !password) {
       return NextResponse.json({ success: false, message: "Champs manquants" }, { status: 400 });
     }
+
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
 
     const connection = await getConnection();
 
@@ -25,7 +29,7 @@ export async function POST(request) {
     // Insérer nouvel utilisateur
     await connection.execute(
       "INSERT INTO users (matricule, email, nom, prenom, password_hash) VALUES (?, ?, ?, ?, ?)",
-      [matricule, email, nom, prenom, password] // à hasher en prod !
+      [matricule, email, nom, prenom, hashedPassword] // à hasher en prod !
     );
 
     await connection.end();
