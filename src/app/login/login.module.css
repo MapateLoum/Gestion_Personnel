@@ -147,3 +147,35 @@
   width: 100%;
   max-width: 600px;
 }
+/* Toast message */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(204, 42, 42, 0.95); /* rouge erreur */
+  color: white;
+  font-weight: 700;
+  padding: 14px 28px;
+  border-radius: 30px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  z-index: 9999;
+  opacity: 1;
+  animation: fadeInOut 4s forwards;
+  pointer-events: none; /* pour que le toast ne bloque pas la souris */
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  10%, 90% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+}

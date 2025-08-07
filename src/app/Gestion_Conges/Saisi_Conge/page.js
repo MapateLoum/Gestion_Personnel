@@ -1,128 +1,276 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import styles from "./saisi.module.css";
+import { useRouter } from "next/navigation";
 
 export default function SaisieConges() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const isLoggedIn = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("isLoggedIn="))
+      ?.split("=")[1];
+    if (isLoggedIn !== "true") router.replace("/login");
+
+    window.onpopstate = () => {
+      const loggedIn = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("isLoggedIn="))
+        ?.split("=")[1];
+      if (loggedIn !== "true") router.replace("/login");
+    };
+  }, [router]);
+
   const [formData, setFormData] = useState({
     matricule: "",
     anciennete: "",
     dateDepart: "",
+    dateDernierRetour: "",
     dateRetour: "",
-    medaille: "",
-    reliquat: "",
-    intercalaire: "",
+    dateRetourPrevue: "",
+    medaille: "0",
+    reliquat: "0",
+    intercalaire: "0",
+    supplFemme: "0",
     observations: "",
-    supplFemme: "",
   });
 
-  const [message, setMessage] = useState("");
+  const [agentInfo, setAgentInfo] = useState(null);
+  const [message, setMessage] = useState(null);
+  const [joursOrdinaires, setJoursOrdinaires] = useState(0);
+  const [joursTotal, setJoursTotal] = useState(0);
+
+  function diffMois(date1, date2) {
+    return (
+      (date2.getFullYear() - date1.getFullYear()) * 12 +
+      (date2.getMonth() - date1.getMonth())
+    );
+  }
+
+  useEffect(() => {
+    async function fetchAgent() {
+      if (!formData.matricule.trim()) {
+        setAgentInfo(null);
+        setFormData((prev) => ({
+          ...prev,
+          anciennete: "",
+          dateDernierRetour: "",
+        }));
+        return;
+      }
+
+      try {
+        const resAgent = await fetch(
+          `/api/personnel/infos/${encodeURIComponent(formData.matricule.trim())}`
+        );
+        const dataAgent = await resAgent.json();
+
+        if (resAgent.ok && dataAgent.found) {
+          const agent = dataAgent.agent;
+          setAgentInfo({
+            matricule: agent.MLE,
+            nom: agent.NOM,
+            prenoms: agent.PRENOMS,
+            poste: agent.INTITULE_DU_POSE,
+            categorie: agent.CATEGORIE,
+            age: agent.age,
+            date_embauche: agent.DATE_EMB,
+          });
+
+          const embaucheDate = new Date(agent.DATE_EMB);
+          const now = new Date();
+          let diff = now.getFullYear() - embaucheDate.getFullYear();
+          const m = now.getMonth() - embaucheDate.getMonth();
+          if (m < 0 || (m === 0 && now.getDate() < embaucheDate.getDate())) diff--;
+
+          setFormData((prev) => ({
+            ...prev,
+            anciennete: diff >= 0 ? diff.toString() : "0",
+          }));
+
+          const resDernierRetour = await fetch(
+            `/api/conges/dernierRetour/${encodeURIComponent(formData.matricule.trim())}`
+          );
+          const dataDernierRetour = await resDernierRetour.json();
+
+          const dernierRetour = resDernierRetour.ok && dataDernierRetour.dateDernierRetour
+            ? dataDernierRetour.dateDernierRetour
+            : agent.DATE_EMB;
+
+          setFormData((prev) => ({
+            ...prev,
+            dateDernierRetour: dernierRetour,
+          }));
+          setMessage(null);
+        } else {
+          setAgentInfo(null);
+          setFormData((prev) => ({
+            ...prev,
+            anciennete: "",
+            dateDernierRetour: "",
+          }));
+          setMessage({ type: "error", text: "Aucun agent trouvé avec ce matricule." });
+        }
+      } catch (err) {
+        console.error(err);
+        setAgentInfo(null);
+        setFormData((prev) => ({
+          ...prev,
+          anciennete: "",
+          dateDernierRetour: "",
+        }));
+        setMessage({ type: "error", text: "Erreur lors de la récupération des données." });
+      }
+    }
+
+    fetchAgent();
+  }, [formData.matricule]);
+
+  useEffect(() => {
+    if (!formData.dateDernierRetour || !formData.dateDepart) {
+      setJoursOrdinaires(0);
+      setJoursTotal(0);
+      setFormData((prev) => ({ ...prev, dateRetourPrevue: "", dateRetour: "" }));
+      return;
+    }
+
+    const dateDernierRetour = new Date(formData.dateDernierRetour);
+    const dateDepart = new Date(formData.dateDepart);
+
+    if (dateDepart <= dateDernierRetour) {
+      setMessage({ type: "error", text: "La date de départ doit être postérieure à la date dernier retour." });
+      setJoursOrdinaires(0);
+      setJoursTotal(0);
+      setFormData((prev) => ({ ...prev, dateRetourPrevue: "", dateRetour: "" }));
+      return;
+    } else {
+      setMessage(null);
+    }
+
+    let mois = diffMois(dateDernierRetour, dateDepart);
+    const resteJours = dateDepart.getDate() - dateDernierRetour.getDate();
+    if (resteJours > 15) mois += 1;
+
+    const joursOrdi = mois * 2;
+    const anciennete = Number(formData.anciennete) || 0;
+    const medaille = Number(formData.medaille) || 0;
+    const reliquat = Number(formData.reliquat) || 0;
+    const intercalaire = Number(formData.intercalaire) || 0;
+    const supplFemme = Number(formData.supplFemme) || 0;
+
+    const total = joursOrdi + anciennete + medaille + reliquat - intercalaire + supplFemme;
+    setJoursOrdinaires(joursOrdi);
+    setJoursTotal(total);
+
+    const dateRetourCalculee = new Date(dateDepart);
+    dateRetourCalculee.setDate(dateRetourCalculee.getDate() + total - 1);
+
+    const yyyy = dateRetourCalculee.getFullYear();
+    const mm = String(dateRetourCalculee.getMonth() + 1).padStart(2, "0");
+    const dd = String(dateRetourCalculee.getDate()).padStart(2, "0");
+
+    const retourStr = `${yyyy}-${mm}-${dd}`;
+    setFormData((prev) => ({
+      ...prev,
+      dateRetourPrevue: retourStr,
+      dateRetour: retourStr,
+    }));
+  }, [
+    formData.dateDernierRetour,
+    formData.dateDepart,
+    formData.anciennete,
+    formData.medaille,
+    formData.reliquat,
+    formData.intercalaire,
+    formData.supplFemme,
+  ]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    if (name === "dateDernierRetour") return;
+
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setMessage(null);
   };
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    if (message) {
+      const timer = setTimeout(() => setMessage(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [message]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Vérification que tous les champs sont remplis
-    const allFilled = Object.values(formData).every((val) => val.trim() !== "");
-    if (!allFilled) {
-      setMessage("Tous les champs doivent être remplis avant d'envoyer.");
-      return;
-    }
-
-    // Vérifier que dateDepart < dateRetour
-    const dateDepart = new Date(formData.dateDepart);
-    const dateRetour = new Date(formData.dateRetour);
-    if (dateDepart >= dateRetour) {
-      setMessage("La date de départ doit être antérieure à la date de retour.");
-      return;
-    }
-
-    setMessage("Données envoyées avec succès !");
-  };
-
-  const imprimer = () => {
     const {
       matricule,
       anciennete,
       dateDepart,
       dateRetour,
+      dateRetourPrevue,
       medaille,
       reliquat,
       intercalaire,
-      observations,
       supplFemme,
+      observations,
     } = formData;
 
-    const content = `
-      <h2>Attestation Administrative de Congés</h2>
-      <p>Par la présente, il est certifié que l'agent portant le matricule <strong>${matricule || "[non renseigné]"}</strong>, ayant une ancienneté de <strong>${anciennete || "[non renseigné]"}</strong> années,</p>
-      <p>a bénéficié d'un congé dont la période s'étend du <strong>${dateDepart || "[non renseigné]"}</strong> au <strong>${dateRetour || "[non renseigné]"}</strong>.</p>
-      <p>Durant cette période, les éléments suivants sont à noter :</p>
-      <ul>
-        <li><strong>Médaille :</strong> ${medaille || "Aucune"}</li>
-        <li><strong>Reliquat :</strong> ${reliquat || "Aucun"}</li>
-        <li><strong>Intercalaire :</strong> ${intercalaire || "Non applicable"}</li>
-        <li><strong>Supplément femme :</strong> ${supplFemme || "Non applicable"}</li>
-      </ul>
-      <p><strong>Observations :</strong> ${observations || "Aucune observation particulière."}</p>
-      <p>Cette attestation est délivrée pour servir et valoir ce que de droit.</p>
-      <p>Fait à [Lieu], le ${new Date().toLocaleDateString()}.</p>
-      <p>Signature de l'autorité compétente</p>
-    `;
+    if (
+      !matricule ||
+      anciennete === "" ||
+      !dateDepart ||
+      !dateRetour ||
+      !dateRetourPrevue ||
+      medaille === "" ||
+      reliquat === "" ||
+      intercalaire === "" ||
+      supplFemme === "" ||
+      !observations
+    ) {
+      setMessage({ type: "error", text: "Veuillez remplir tous les champs obligatoires." });
+      return;
+    }
 
-    const printWindow = window.open("", "", "width=800,height=600");
-    printWindow.document.write(`
-      <html>
-        <head>
-          <title>Attestation de congés</title>
-          <style>
-            body {
-              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-              padding: 30px;
-              color: #333;
-              line-height: 1.5;
-            }
-            h2 {
-              color: #076969;
-              text-align: center;
-              margin-bottom: 20px;
-              text-transform: uppercase;
-              letter-spacing: 1.2px;
-            }
-            p {
-              font-size: 16px;
-              margin: 12px 0;
-            }
-            ul {
-              margin-left: 20px;
-              margin-bottom: 20px;
-            }
-            li {
-              font-size: 16px;
-              margin: 6px 0;
-            }
-            strong {
-              color: #076969;
-            }
-          </style>
-        </head>
-        <body>
-          ${content}
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
-    printWindow.close();
+    try {
+      const response = await fetch("/api/conges", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          matricule: matricule.trim(),
+          anciennete: Number(anciennete),
+          dateDepart,
+          dateRetour,
+          dateRetourPrevue,
+          medaille: Number(medaille),
+          reliquat: Number(reliquat),
+          intercalaire: Number(intercalaire),
+          supplFemme: Number(supplFemme),
+          observations: observations.trim(),
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        setMessage({ type: "success", text: "Congé enregistré avec succès." });
+        setFormData((prev) => ({
+          ...prev,
+          dateDepart: "",
+          dateRetour: "",
+          dateRetourPrevue: "",
+          observations: "",
+        }));
+      } else {
+        setMessage({ type: "error", text: result.message || "Erreur lors de l'enregistrement." });
+      }
+    } catch (error) {
+      console.error("Erreur front-end :", error);
+      setMessage({ type: "error", text: "Erreur serveur ou réseau." });
+    }
   };
 
   return (
@@ -135,110 +283,124 @@ export default function SaisieConges() {
       </header>
 
       <form className={styles.form} onSubmit={handleSubmit}>
-        <label htmlFor="matricule">Matricule :</label>
+        <label>Matricule :</label>
         <input
           type="text"
-          id="matricule"
           name="matricule"
           value={formData.matricule}
           onChange={handleChange}
           required
         />
 
-        <label htmlFor="anciennete">Ancienneté (années) :</label>
+        {agentInfo && (
+          <div className={styles.agentInfo}>
+            <p><strong>Nom :</strong> {agentInfo.nom}</p>
+            <p><strong>Prénoms :</strong> {agentInfo.prenoms}</p>
+            <p><strong>Poste :</strong> {agentInfo.poste}</p>
+            <p><strong>Catégorie :</strong> {agentInfo.categorie}</p>
+            <p><strong>Âge :</strong> {agentInfo.age} ans</p>
+            <p><strong>Date embauche :</strong> {agentInfo.date_embauche}</p>
+          </div>
+        )}
+
+        <label>Ancienneté (années) :</label>
         <input
           type="number"
-          id="anciennete"
           name="anciennete"
-          min="0"
           value={formData.anciennete}
           onChange={handleChange}
-          required
+          min="0"
         />
 
-        <label htmlFor="dateDepart">Date départ :</label>
+        <label>Date dernier retour :</label>
         <input
           type="date"
-          id="dateDepart"
+          name="dateDernierRetour"
+          value={formData.dateDernierRetour}
+          readOnly
+          style={{ backgroundColor: "#eee" }}
+        />
+
+        <label>Date départ :</label>
+        <input
+          type="date"
           name="dateDepart"
           value={formData.dateDepart}
           onChange={handleChange}
           required
         />
 
-        <label htmlFor="dateRetour">Date retour :</label>
+        <label>Médaille :</label>
         <input
-          type="date"
-          id="dateRetour"
-          name="dateRetour"
-          value={formData.dateRetour}
-          onChange={handleChange}
-          required
-        />
-
-        <label htmlFor="medaille">Médaille :</label>
-        <input
-          type="text"
-          id="medaille"
+          type="number"
           name="medaille"
           value={formData.medaille}
           onChange={handleChange}
+          min="0"
         />
 
-        <label htmlFor="reliquat">Reliquat :</label>
+        <label>Reliquat :</label>
         <input
-          type="text"
-          id="reliquat"
+          type="number"
           name="reliquat"
           value={formData.reliquat}
           onChange={handleChange}
+          min="0"
         />
 
-        <label htmlFor="intercalaire">Intercalaire :</label>
+        <label>Intercalaire :</label>
         <input
-          type="text"
-          id="intercalaire"
+          type="number"
           name="intercalaire"
           value={formData.intercalaire}
           onChange={handleChange}
+          min="0"
         />
 
-        <label htmlFor="observations">Observations :</label>
-        <textarea
-          id="observations"
-          name="observations"
-          value={formData.observations}
-          onChange={handleChange}
-          rows={4}
-        />
-
-        <label htmlFor="supplFemme">Supplément femme :</label>
+        <label>Supplément femme :</label>
         <input
-          type="text"
-          id="supplFemme"
+          type="number"
           name="supplFemme"
           value={formData.supplFemme}
           onChange={handleChange}
+          min="0"
+        />
+
+        <label>Observations :</label>
+        <textarea
+          name="observations"
+          value={formData.observations}
+          onChange={handleChange}
+          rows={3}
+          required
+        />
+
+        <label><strong>Jours de congé ordinaires calculés :</strong> {joursOrdinaires}</label>
+        <label><strong>Total jours de congé :</strong> {joursTotal}</label>
+
+        <label>Date retour prévue :</label>
+        <input
+          type="date"
+          name="dateRetourPrevue"
+          value={formData.dateRetourPrevue}
+          readOnly
+          style={{ backgroundColor: "#eee" }}
         />
 
         <div className={styles.buttons}>
-          <button type="submit">Envoyer</button>
-          <button type="button" onClick={imprimer} className={styles.printBtn}>
-            Imprimer
-          </button>
+          <button type="submit">Enregistrer</button>
         </div>
-
-        {message && (
-          <p
-            className={
-              message.includes("succès") ? styles.acceptMsg : styles.rejectMsg
-            }
-            style={{ marginTop: "15px", fontWeight: "bold" }}
-          >
-            {message}
-          </p>
-        )}
       </form>
+
+      {message && (
+        <div
+          className={`${styles.fixedMessage} ${
+            message.type === "success" ? styles.success : styles.rejectMsg
+          }`}
+        >
+          {message.text}
+        </div>
+      )}
     </main>
   );
 }

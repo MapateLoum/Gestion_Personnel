@@ -1,77 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./consultation.module.css";
-
-const fakeAgents = {
-  "1234": {
-    nom: "DIALLO",
-    prenom: "Aminata",
-    poste: "Chargée RH",
-    categorie: "A",
-    reg: "Sénégal",
-    dateNaissance: "1985-02-15",
-    dateEmbauche: "2010-07-01",
-    baseHoraire: "40h",
-    conges: [
-      {
-        ref: "C-2023-001",
-        dateDepart: "2023-05-10",
-        medaille: "OUI",
-        reliquat: 5,
-        anciennete: 13,
-        observation: "Congé annuel",
-        dateReference: "2023-01-01",
-        supplFemme: "Oui",
-        matricule: "1234",
-        intercalaire: "Non",
-      },
-      {
-        ref: "C-2024-002",
-        dateDepart: "2024-01-20",
-        medaille: "NON",
-        reliquat: 2,
-        anciennete: 14,
-        observation: "Congé maladie",
-        dateReference: "2024-01-01",
-        supplFemme: "Non",
-        matricule: "1234",
-        intercalaire: "Oui",
-      },
-    ],
-  },
-  "5678": {
-    nom: "NDIAYE",
-    prenom: "Moussa",
-    poste: "Technicien",
-    categorie: "B",
-    reg: "Sénégal",
-    dateNaissance: "1990-10-10",
-    dateEmbauche: "2015-03-12",
-    baseHoraire: "35h",
-    conges: [
-      {
-        ref: "C-2023-010",
-        dateDepart: "2023-06-15",
-        medaille: "NON",
-        reliquat: 0,
-        anciennete: 8,
-        observation: "Congé sans solde",
-        dateReference: "2023-01-01",
-        supplFemme: "Non",
-        matricule: "5678",
-        intercalaire: "Non",
-      },
-    ],
-  },
-};
 
 export default function ConsultationConge() {
   const [matricule, setMatricule] = useState("");
   const [agent, setAgent] = useState(null);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  // Protection isLoggedIn
+  useEffect(() => {
+    const isLoggedIn = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("isLoggedIn="))
+      ?.split("=")[1];
+
+    if (isLoggedIn !== "true") {
+      router.replace("/login");
+    }
+
+    window.onpopstate = () => {
+      const loggedIn = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("isLoggedIn="))
+        ?.split("=")[1];
+      if (loggedIn !== "true") {
+        router.replace("/login");
+      }
+    };
+  }, [router]);
 
   const handleChange = (e) => {
     setMatricule(e.target.value);
@@ -79,16 +39,43 @@ export default function ConsultationConge() {
     setAgent(null);
   };
 
-  const handleSearch = (e) => {
+  const handleSearch = async (e) => {
     e.preventDefault();
-    if (fakeAgents[matricule]) {
-      setAgent(fakeAgents[matricule]);
-      setError("");
-    } else {
-      setAgent(null);
-      setError("Aucun agent trouvé avec ce matricule.");
+    if (!matricule.trim()) {
+      setError("Veuillez saisir un matricule.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setAgent(null);
+
+    try {
+      const res = await fetch(
+        `/api/consultation_conge?matricule=${encodeURIComponent(matricule.trim())}`
+      );
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        setAgent(data.agent);
+      } else {
+        setError(data.message || "Erreur lors de la recherche.");
+      }
+    } catch (err) {
+      setError("Erreur réseau, veuillez réessayer.");
+    } finally {
+      setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => {
+        setError("");
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
 
   const handleCancel = () => {
     setMatricule("");
@@ -119,8 +106,8 @@ export default function ConsultationConge() {
         </div>
 
         <div className={styles.buttons}>
-          <button type="submit" className={styles.buttonEnvoyer}>
-            Rechercher
+          <button type="submit" className={styles.buttonEnvoyer} disabled={loading}>
+            {loading ? "Recherche..." : "Rechercher"}
           </button>
           <button type="button" onClick={handleCancel} className={styles.buttonAnnuler}>
             Annuler
@@ -130,7 +117,11 @@ export default function ConsultationConge() {
           </button>
         </div>
 
-        {error && <p className={styles.errorMessage}>{error}</p>}
+        {error && (
+          <div className={styles.fixedMessage} role="alert" aria-live="assertive">
+            {error}
+          </div>
+        )}
       </form>
 
       {agent && (
@@ -143,7 +134,6 @@ export default function ConsultationConge() {
           <p><strong>Région :</strong> {agent.reg}</p>
           <p><strong>Date de naissance :</strong> {agent.dateNaissance}</p>
           <p><strong>Date d'embauche :</strong> {agent.dateEmbauche}</p>
-          <p><strong>Base horaire :</strong> {agent.baseHoraire}</p>
 
           <h3>Historique des congés</h3>
           <div className={styles.tableContainer}>
@@ -152,13 +142,12 @@ export default function ConsultationConge() {
                 <tr>
                   <th>Réf.</th>
                   <th>Date départ</th>
+                  <th>Date retour</th>
                   <th>Médaille</th>
                   <th>Reliquat</th>
                   <th>Ancienneté</th>
                   <th>Observation</th>
-                  <th>Date référence</th>
                   <th>Supplément femme</th>
-                  <th>Matricule</th>
                   <th>Intercalaire</th>
                 </tr>
               </thead>
@@ -167,13 +156,12 @@ export default function ConsultationConge() {
                   <tr key={i}>
                     <td>{conge.ref}</td>
                     <td>{conge.dateDepart}</td>
+                    <td>{conge.dateRetour}</td>
                     <td>{conge.medaille}</td>
                     <td>{conge.reliquat}</td>
                     <td>{conge.anciennete}</td>
                     <td>{conge.observation}</td>
-                    <td>{conge.dateReference}</td>
                     <td>{conge.supplFemme}</td>
-                    <td>{conge.matricule}</td>
                     <td>{conge.intercalaire}</td>
                   </tr>
                 ))}

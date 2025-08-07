@@ -1,8 +1,24 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import styles from './register.module.css'; // Assure-toi que le fichier CSS s'appelle bien ainsi
+import styles from './register.module.css';
+
+function Toast({ message, type = "error", onClose }) {
+  useEffect(() => {
+    if (!message) return;
+    const timer = setTimeout(() => onClose(), 4000);
+    return () => clearTimeout(timer);
+  }, [message, onClose]);
+
+  if (!message) return null;
+
+  return (
+    <div className={`${styles.toast} ${type === 'success' ? styles.toastSuccess : styles.toastError}`}>
+      {message}
+    </div>
+  );
+}
 
 export default function Register() {
   const [matricule, setMatricule] = useState('');
@@ -11,37 +27,64 @@ export default function Register() {
   const [prenom, setPrenom] = useState('');
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [toastMsg, setToastMsg] = useState('');
+  const [toastType, setToastType] = useState('error'); // 'error' ou 'success'
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
+    setToastMsg('');
 
     if (!matricule || !mail || !nom || !prenom || !password || !confirm) {
-      setError('Veuillez remplir tous les champs.');
+      setToastType('error');
+      setToastMsg('Veuillez remplir tous les champs.');
       return;
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(mail)) {
-      setError('Veuillez entrer un email valide.');
+      setToastType('error');
+      setToastMsg('Veuillez entrer un email valide.');
       return;
     }
 
     if (password !== confirm) {
-      setError('Les mots de passe ne correspondent pas.');
-      return;
-    }
+  setToastType('error');
+  setToastMsg('Les mots de passe ne correspondent pas.');
+  return;
+}
 
-    setSuccess('Inscription réussie ! Vous pouvez maintenant vous connecter.');
-    setMatricule('');
-    setMail('');
-    setNom('');
-    setPrenom('');
-    setPassword('');
-    setConfirm('');
+if (password.length < 8) {
+  setToastType('error');
+  setToastMsg('Le mot de passe doit contenir au moins 8 caractères.');
+  return;
+}
+
+    try {
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ matricule, email: mail, nom, prenom, password }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setToastType('success');
+        setToastMsg('Inscription réussie ! Vous pouvez maintenant vous connecter.');
+        setMatricule('');
+        setMail('');
+        setNom('');
+        setPrenom('');
+        setPassword('');
+        setConfirm('');
+      } else {
+        setToastType('error');
+        setToastMsg(data.message || "Erreur lors de l'inscription.");
+      }
+    } catch (err) {
+      setToastType('error');
+      setToastMsg('Erreur serveur, veuillez réessayer plus tard.');
+    }
   };
 
   return (
@@ -60,8 +103,6 @@ export default function Register() {
 
       <section className={styles.formSection}>
         <form onSubmit={handleSubmit} className={styles.form} noValidate>
-          {error && <p className={styles.error}>{error}</p>}
-          {success && <p className={styles.success}>{success}</p>}
 
           <label htmlFor="matricule" className={styles.label}>Matricule</label>
           <input
@@ -148,6 +189,9 @@ export default function Register() {
         <p>© 2025 Industries Chimiques du Sénégal</p>
         <p>Tous droits réservés</p>
       </footer>
+
+      {/* Toast message */}
+      <Toast message={toastMsg} type={toastType} onClose={() => setToastMsg('')} />
     </main>
   );
 }
